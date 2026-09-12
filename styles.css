@@ -3022,3 +3022,12 @@ cursor: pointer;
     color: #FCB55F;
     transform: translateY(-2px);
 }
+
+
+
+.more-tasks {
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-top: .5rem;
+}

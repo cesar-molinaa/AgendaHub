@@ -276,7 +276,10 @@ function renderTasks() {
         return a.date.localeCompare(b.date);
     });
 
-    tareasOrdenadas.forEach(task => {
+    const tareasHechas = tareasOrdenadas.filter(task => task.status === "done");
+    const tareasVisibles = tareasOrdenadas.filter(task => task.status !== "done");
+
+    tareasVisibles.forEach(task => {
 
         const taskCard = document.createElement("div");
 
@@ -318,7 +321,53 @@ function renderTasks() {
         if (task.status === "done") {
             doneList.appendChild(taskCard);
         }
-    })
+    });
+
+
+    const tareasHechasVisibles = tareasHechas.slice(-5);
+
+    tareasHechasVisibles.forEach(task => {
+
+        const taskCard = document.createElement("div");
+
+        taskCard.classList.add("task-card");
+
+        taskCard.addEventListener("click", () => {
+            openTaskInfo(task);
+        });
+
+        taskCard.innerHTML = `
+            <div class="task-main">
+                <h3>${task.title}</h3>
+            </div>
+
+            <div class="task-actions">
+                <span class="task-date">${task.date.split("-").reverse().slice(0, 2).join("/")}</span>
+                <button class="task-status-button">▼</button>
+            </div>
+        `;
+
+        const subject = getSubjectById(task.subject);
+
+        if (subject) {
+            taskCard.style.backgroundColor = subject.color;
+        }
+
+        addStatusMenu(taskCard, task);
+
+        doneList.appendChild(taskCard);
+    });
+
+    if (tareasHechas.length > 5) {
+
+        const more = document.createElement("div");
+
+        more.classList.add("more-tasks");
+
+        more.textContent = "...";
+
+        doneList.appendChild(more);
+    }
 }
 
 
