@@ -401,9 +401,23 @@ function renderPendingTasks() {
 
     pendingAllList.innerHTML = "";
 
+    const pendingTasks = tasks.filter(task => task.status !== "done");
+
+    if (pendingTasks.length === 0) {
+
+        pendingAllList.innerHTML = `
+            <div class="empty-message">
+                <p>¡No tienes ninguna tarea pendiente!</p>
+            </div>
+        `;
+
+        return;
+    }
+
     
 
-    const pendingTasks = tasks.filter(task => task.status !== "done");
+
+    
 
 
     pendingTasks
