@@ -32,6 +32,16 @@ body::before {
     z-index: -1;
 }
 
+
+a{
+    color: #191923;
+    transition: .2s ease;
+}
+
+a:hover{
+    color: #FCB55F;
+}
+
 header{
     box-sizing: border-box;
     width: 90%;
@@ -162,7 +172,7 @@ header .main h1{
 #dashboardd{
     background-color: transparent;
     border: transparent;
-    box-sizing: 0 0 0 transparent;
+    box-sizing: border-box;
 }
 
 
@@ -2992,14 +3002,23 @@ cursor: pointer;
 }
 
 
-#link-pdf{
-    font-size: 1rem;
-    color: #191923;
+
+
+.welcome #link-pdf {
+    display: inline-block;
+    width: fit-content;
+
     margin-top: .5rem;
+
+    color: #191923;
+    font-size: .8rem;
+    font-weight: 700;
+    text-decoration: underline;
 
     transition: .2s ease;
 }
 
-#link-pdf:hover{
+.welcome #link-pdf:hover {
     color: #FCB55F;
+    transform: translateY(-2px);
 }
