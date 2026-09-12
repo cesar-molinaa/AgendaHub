@@ -357,31 +357,62 @@ document.getElementById("editSubjectName").addEventListener("click", () => {
 
 });
 
-// ELIMINAR ASIGNATURA
 
+
+// ELIMINAR ASIGNATURA
 document.getElementById("deleteSubject").addEventListener("click", () => {
 
     if (!currentSubject) {
         return;
     }
 
-
     const confirmDelete = confirm(
         `¿Seguro que quieres eliminar la asignatura "${currentSubject.name}"?`
     );
-
 
     if (!confirmDelete) {
         return;
     }
 
-
-    // ELIMINAR DEL ARRAY
-    subjects = subjects.filter(subject => subject.id !== currentSubject.id);
+    const subjectId = currentSubject.id;
 
 
-    // GUARDAR
+    // ELIMINAR ASIGNATURA
+    subjects = subjects.filter(subject => subject.id !== subjectId);
     saveSubjects();
+
+
+    // ELIMINAR TAREAS DE ESA ASIGNATURA
+    let tasks = JSON.parse(localStorage.getItem("agendahub-tasks")) || [];
+
+    tasks = tasks.filter(task => task.subject != subjectId);
+
+    localStorage.setItem(
+        "agendahub-tasks",
+        JSON.stringify(tasks)
+    );
+
+
+    // ELIMINAR CALIFICACIONES DE ESA ASIGNATURA
+    let marks = JSON.parse(localStorage.getItem("agendahub-marks")) || [];
+
+    marks = marks.filter(mark => mark.subject != subjectId);
+
+    localStorage.setItem(
+        "agendahub-marks",
+        JSON.stringify(marks)
+    );
+
+
+    // ELIMINAR EVENTOS DE ESA ASIGNATURA
+    let events = JSON.parse(localStorage.getItem("eventos")) || [];
+
+    events = events.filter(event => event.asignatura != subjectId);
+
+    localStorage.setItem(
+        "eventos",
+        JSON.stringify(events)
+    );
 
 
     // REINICIAR ASIGNATURA ACTUAL
@@ -390,7 +421,6 @@ document.getElementById("deleteSubject").addEventListener("click", () => {
 
     // CERRAR LA PÁGINA DE LA ASIGNATURA
     document.getElementById("subjectPage").style.display = "none";
-
     document.getElementById("subjectsFeed").style.display = "grid";
 
 
@@ -403,6 +433,7 @@ document.getElementById("deleteSubject").addEventListener("click", () => {
     loadSubjectsIntoSelect("examSubject");
 
 });
+
 
 
 //BOTON PARA CERRAR ASIGNATURA----------------------------------------------------------------------
