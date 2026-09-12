@@ -2747,6 +2747,10 @@ cursor: pointer;
 
 .welcome {
     margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: .5rem;
 }
 
 .welcome h2 {
@@ -2985,4 +2989,17 @@ cursor: pointer;
 .asignatura-card:hover {
     transform: translate(-2px, -2px);
     box-shadow: 7px 7px 0 #191923;
+}
+
+
+#link-pdf{
+    font-size: 1rem;
+    color: #191923;
+    margin-top: .5rem;
+
+    transition: .2s ease;
+}
+
+#link-pdf:hover{
+    color: #FCB55F;
 }
