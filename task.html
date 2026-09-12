@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgendaHub</title>
+    <link rel="icon" href="imgs/agendahub-icon.png" type="image/x-icon">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <header>
+
+        <div class="main">
+            <img src="imgs/menu.png" id="menuBtn">
+            <h1>AgendaHub</h1>
+        </div>
+
+        <div class="buttons">
+            <img src="imgs/lupa.png" class="search" id="search">
+            <img src="imgs/lupa.png" class="search" id="search">
+            <img src="imgs/lupa.png" class="search" id="search">
+
+        </div>
+
+
+        
+
+    </header>
+
+    <div class="sidebar" id="sidebar">
+
+        <div class="item"><img src="imgs/casa.png"><a href="index.html">Inicio</a></div>
+        <div class="item"><img src="imgs/calendar.png" alt=""><a href="calendario.html">Mi agenda</a></div>
+        <div class="item"><img src="imgs/task.png" alt=""><a href="task.html">Tareas</a></div>
+        <div class="item"><img src="imgs/bars.png" alt=""><a href="mark.html">Calificaciones</a></div>
+        <div class="item"><img src="imgs/libro.png" alt=""><a href="subjects.html">Asignaturas</a></div>
+    </div>
+
+    <main>
+
+        <div class="tasks-main">
+
+            <div class="tasks-header">
+                <h1>Tareas</h1>
+
+                <button class="new-task" id="newTask">+  Tarea nueva</button>
+            </div>
+
+
+            <div class="tasks-recount">
+
+                <div class="tasks-recount-div">
+                    <h3>Total</h3>
+                    <p id="totalTasks">0</p>
+                </div>
+
+                <div class="tasks-recount-div">
+                    <h3>Para mañana</h3>
+                    <p id="tomorrowTasks">0</p>
+                </div>
+
+                <div class="tasks-recount-div">
+                    <h3>Completadas</h3>
+                    <p id="completedTasks">0</p>
+                </div>
+
+            </div>
+
+
+            <div class="tasks-tomorrow">
+
+                <h2>Para mañana</h2>
+
+                <div class="tomorrow-list" id="tomorrowList">
+
+
+                </div>
+            </div>
+
+
+            <div class="tasks-state">
+
+                <h2>Estado</h2>
+
+                <div class="state-display">
+
+                    <div class="state-div" id="pendiente">
+
+                        <div class="state-header">
+                            <h3>Pendiente</h3>
+                        </div>
+
+                        <div class="state-list" id="pendingList">
+
+                        </div>
+                    </div>
+
+                    <div class="state-div" id="progreso">
+
+                        <div class="state-header">
+                            <h3>En progreso</h3>
+                        </div>
+
+                        <div class="state-list" id="progressList">
+
+                        </div>
+                    </div>
+
+                    <div class="state-div" id="hecho">
+
+                        <div class="state-header">
+                            <h3>Hecho</h3>
+                        </div>
+
+                        <div class="state-list" id="doneList">
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+
+            <div class="tasks-pending">
+
+                <h2>Tareas pendientes</h2>
+
+                <div class="pending-all-list" id="pendingAllList">
+
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="modal" id="taskModal">
+
+            <div class="task-form">
+
+                <h2 id="taskFormTitle">Nueva Tarea</h2>
+
+                <input 
+                type="text"
+                id="taskTitle"
+                placeholder="Nombre de la tarea"
+                >
+
+                <select id="taskSubject">
+
+                </select>
+
+
+                <input 
+                type="date"
+                id="taskDate"
+                >
+
+                <input 
+                type="time"
+                id="taskTime"
+                >
+
+                <textarea id="taskDescription"></textarea>
+
+                <p class="form-error" id="formError"></p>
+
+                <div class="form-buttons">
+
+                    <button id="cancelTask">Cancelar</button>
+
+                    <button id="saveTask">Guardar</button>
+                </div>
+
+                
+            </div>
+        </div>
+
+
+    <div class="task-info-modal" id="taskInfoModal">
+
+        <div class="task-info">
+
+            <div class="info-header">
+
+                <h2 id="taskInfoTitle">Título</h2>
+
+                <button id="closeTaskInfo">Cerrar</button>
+
+            </div>
+
+            <div class="info-row">
+                <strong>Asignatura:</strong>
+                <span id="taskInfoSubject"></span>
+            </div>
+
+            <div class="info-row">
+                <strong>Fecha:</strong>
+                <span id="taskInfoDate"></span>
+            </div>
+
+            <div class="info-row">
+                <strong>Hora:</strong>
+                <span id="taskInfoTime"></span>
+            </div>
+
+            <div class="info-row">
+                <strong>Estado:</strong>
+                <span id="taskInfoStatus"></span>
+            </div>
+
+            <div class="info-row">
+                <strong>Descripción:</strong>
+                <span id="taskInfoDescription"></span>
+            </div>
+
+            <div class="info-buttons">
+
+                <button id="editTask">Editar</button>
+
+                <button id="deleteTask">Eliminar</button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    </main>
+    
+
+    <script src="script.js"></script>
+    <script src="subjects.js"></script>
+    <script src="task.js"></script>
+</body>
+</html>

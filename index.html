@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgendaHub</title>
+    <link rel="icon" href="imgs/agendahub-icon.png" type="image/x-icon">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <header>
+
+        <div class="main">
+            <img src="imgs/menu.png" id="menuBtn">
+            <h1>AgendaHub</h1>
+        </div>
+
+        <div class="buttons">
+            <img src="imgs/lupa.png" class="search" id="search">
+            <img src="imgs/lupa.png" class="search" id="search">
+            <img src="imgs/lupa.png" class="search" id="search">
+
+        </div>
+
+
+        
+
+    </header>
+
+    <div class="sidebar" id="sidebar">
+
+        <div class="item"><img src="imgs/casa.png"><a href="index.html">Inicio</a></div>
+        <div class="item"><img src="imgs/calendar.png" alt=""><a href="calendario.html">Mi agenda</a></div>
+        <div class="item"><img src="imgs/task.png" alt=""><a href="task.html">Tareas</a></div>
+        <div class="item"><img src="imgs/bars.png" alt=""><a href="mark.html">Calificaciones</a></div>
+        <div class="item"><img src="imgs/libro.png" alt=""><a href="subjects.html">Asignaturas</a></div>
+    </div>
+
+    <main class="dashboardd">
+
+
+
+    <div class="tasks-main" id="dashboardd">
+
+        <div class="welcome">
+
+            <h2>Bienvenido a AgendaHub</h2>
+            <p>Aquí tienes un resumen de lo más importante.</p>
+
+        </div>
+
+
+        <div class="dashboard-grid">
+
+
+            <!-- PRÓXIMAMENTE -->
+
+            <section class="dashboard-card">
+
+                <div class="dashboard-card-header">
+                    <h3>Próximamente</h3>
+                    <a href="calendario.html">Ver agenda</a>
+                </div>
+
+                <div id="upcomingEvents" class="dashboard-list">
+
+                    <!-- Los eventos aparecerán aquí -->
+
+                </div>
+
+            </section>
+
+
+            <!-- TAREAS -->
+
+            <section class="dashboard-card">
+
+                <div class="dashboard-card-header">
+                    <h3>Tareas</h3>
+                    <a href="task.html">Ver tareas</a>
+                </div>
+
+                <div id="dashboardTasks" class="dashboard-list">
+
+                    <!-- Las tareas aparecerán aquí -->
+
+                </div>
+
+            </section>
+
+
+        </div>
+
+
+        <!-- RENDIMIENTO -->
+
+        <section class="dashboard-card performance-card">
+
+            <div class="dashboard-card-header">
+                <h3>Rendimiento</h3>
+                <a href="mark.html">Ver calificaciones</a>
+            </div>
+
+            <div class="general-performance">
+
+                <div>
+
+                    <p>Media general</p>
+                    <strong id="dashboardAverage">-</strong>
+
+                </div>
+
+                <div class="mark-progress">
+
+                    <div
+                        class="mark-progress-fill"
+                        id="dashboardAverageProgress">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div id="dashboardSubjects" class="dashboard-subjects">
+
+                <!-- Las asignaturas aparecerán aquí -->
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+        
+
+</main>
+
+
+    
+
+    <script src="script.js"></script>
+    <script src="index.js"></script>
+</body>
+</html>

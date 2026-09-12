@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgendaHub</title>
+    <link rel="icon" href="imgs/agendahub-icon.png" type="image/x-icon">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <header>
+
+        <div class="main">
+            <img src="imgs/menu.png" id="menuBtn">
+            <h1>AgendaHub</h1>
+        </div>
+
+        <div class="buttons">
+            <img src="imgs/lupa.png" class="search" id="search">
+            <img src="imgs/lupa.png" class="search" id="search">
+            <img src="imgs/lupa.png" class="search" id="search">
+
+        </div>
+
+
+        
+
+    </header>
+
+    <div class="sidebar" id="sidebar">
+
+        <div class="item"><img src="imgs/casa.png"><a href="index.html">Inicio</a></div>
+        <div class="item"><img src="imgs/calendar.png" alt=""><a href="calendario.html">Mi agenda</a></div>
+        <div class="item"><img src="imgs/task.png" alt=""><a href="task.html">Tareas</a></div>
+        <div class="item"><img src="imgs/bars.png" alt=""><a href="mark.html">Calificaciones</a></div>
+        <div class="item"><img src="imgs/libro.png" alt=""><a href="subjects.html">Asignaturas</a></div>
+    </div>
+
+    
+    <main>
+
+
+        <div class="seccion-vistas-agenda">
+
+
+            <div class="eventos">
+
+            <div class="title">
+                <h2>Mi agenda</h2>
+
+                <div class="buttons">
+
+                    <button id="todayBtn">Hoy</button>
+
+                    <div class="view-selector">
+                        <button id="viewBtn">
+                            Mes 
+                            <span>▼</span>
+                        </button>
+
+                        <div class="view-menu" id="viewMenu">
+                            <button data-view="month">Mes</button>
+                            <button data-view="week">Semana</button>
+                            <button data-view="day">Día</button>
+                        </div>
+                    </div>
+
+
+                    <button id="addEvent"> + </button>
+                </div>
+
+                
+            </div>
+
+
+            <div class="calendar" id="calendar">
+
+                <div class="calendar-header" id="calendarHeader">
+
+                    <button id="prevMonth">◀</button>
+
+                    <h2 id="currentMonth">Septiembre</h2>
+
+                    <button id="nextMonth">▶</button>
+                </div>
+
+                <div class="calendar-weekdays">
+
+                    <span>LUN</span>
+                    <span>MAR</span>
+                    <span>MIÉ</span>
+                    <span>JUE</span>
+                    <span>VIE</span>
+                    <span>SÁB</span>
+                    <span>DOM</span>
+
+                </div>
+
+                <div class="calendar-days" id="calendarDays"></div>
+
+            </div>
+            </div>
+
+
+            <div class="calendars-panel">
+
+                <div class="calendars-header">
+                    <h4>Mis calendarios</h4>
+
+                    <button id="addCalendar">+</button>
+                </div>
+
+                <div id="calendarList"></div>
+
+            </div>
+
+        </div>
+
+        
+
+
+    </main>
+
+
+
+    <div class="modal" id="eventModal">
+
+        <div class="event-form">
+
+            <h2 id="eventFormTitle">Nuevo evento</h2>
+
+            <input 
+            type="text"
+            id="eventTitle"
+            placeholder="Nombre del evento"
+            >
+
+            <select id="eventSubject">
+
+            </select>
+
+            <select id="eventCalendar">
+                <option value="">Selecciona un calendario</option>
+                <option value="bachillerato">Bachillerato</option>
+                <option value="personal">Personal</option>
+            </select>
+
+            <input 
+            type="date"
+            id="eventDate"
+            >
+
+            <input 
+            type="time"
+            id="eventTime"
+            >
+
+            <textarea id="eventDescription"></textarea>
+
+            <p class="form-error" id="formError"></p>
+
+            <div class="form-buttons">
+
+                <button id="cancelEvent">Cancelar</button>
+
+                <button id="saveEvent">Guardar</button>
+            </div>
+
+            
+        </div>
+    </div>
+
+    <div class="event-info-modal" id="eventInfoModal">
+
+        <div class="event-info">
+
+            <div class="info-header">
+
+                <h2 id="infoTitle"></h2>
+
+                <button id="closeInfo">Cerrar</button>
+
+            </div>
+            
+
+            <div class="info-row">
+                <strong>Asignatura:</strong>
+                <span id="infoSubject"></span>
+            </div>
+
+            <div class="info-row">
+                <strong>Fecha:</strong>
+                <span id="infoDate"></span>
+            </div>
+
+            <div class="info-row">
+                <strong>Hora:</strong>
+                <span id="infoTime"></span>
+            </div>
+
+            <div class="info-row">
+                <strong>Descripción:</strong>
+                <span id="infoDescription"></span>
+            </div>
+
+
+            <div class="info-buttons">
+                <button id="editEvent">Editar</button>
+                <button id="deleteEvent">Eliminar</button>
+            </div>
+            
+
+            
+
+        </div>
+    </div>
+
+    <div class="modal" id="calendarModal">
+
+        <div class="calendar-form">
+
+            <h2>Nuevo calendario</h2>
+
+            <p>Crea un calendario para organizar tus eventos.</p>
+
+            <input
+                type="text"
+                id="calendarName"
+                placeholder="Nombre del calendario"
+                maxlength="25"
+            >
+
+            <p class="form-error" id="calendarError"></p>
+
+            <div class="form-buttons">
+
+                <button id="cancelCalendar">
+                    Cancelar
+                </button>
+
+                <button id="saveCalendar">
+                    Crear calendario
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+    <script src="subjects.js"></script>
+    <script src="calendar.js"></script>
+</body>
+</html>

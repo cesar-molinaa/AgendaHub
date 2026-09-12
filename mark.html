@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgendaHub</title>
+    <link rel="icon" href="imgs/agendahub-icon.png" type="image/x-icon">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <header>
+
+        <div class="main">
+            <img src="imgs/menu.png" id="menuBtn">
+            <h1>AgendaHub</h1>
+        </div>
+
+        <div class="buttons">
+            <img src="imgs/lupa.png" class="search" id="search">
+            <img src="imgs/lupa.png" class="search" id="search">
+            <img src="imgs/lupa.png" class="search" id="search">
+
+        </div>
+
+
+        
+
+    </header>
+
+    <div class="sidebar" id="sidebar">
+
+        <div class="item"><img src="imgs/casa.png"><a href="index.html">Inicio</a></div>
+        <div class="item"><img src="imgs/calendar.png" alt=""><a href="calendario.html">Mi agenda</a></div>
+        <div class="item"><img src="imgs/task.png" alt=""><a href="task.html">Tareas</a></div>
+        <div class="item"><img src="imgs/bars.png" alt=""><a href="mark.html">Calificaciones</a></div>
+        <div class="item"><img src="imgs/libro.png" alt=""><a href="subjects.html">Asignaturas</a></div>
+    </div>
+
+    <main>
+
+        <div class="marks-main">
+
+            <div class="tasks-header">
+                <h1>Calificaciones</h1>
+
+                <button class="new-mark" id="newMark">+   Nota nueva</button>
+            </div>
+
+
+            <div class="tasks-recount">
+
+                <div class="marks-recount-div">
+                    <h3>Media general</h3>
+                    <p id="totalMarks">0</p>
+
+                    <div class="mark-progress">
+                        <div
+                            class="mark-progress-fill"
+                            id="generalProgress"
+                        ></div>
+                    </div>
+
+                </div>
+
+
+            </div>
+
+            <div class="asignaturas">
+                <h1>Mis asignaturas</h1>
+
+                <div class="asignaturas-feed" id="asignaturasFeed"> </div>
+
+
+            </div>
+
+
+
+            
+        </div>
+
+
+        <div class="modal" id="markModal">
+
+            <div class="task-form">
+
+                <h2 id="taskFormTitle">Nueva Nota</h2>
+
+                <input 
+                type="text"
+                id="markTitle"
+                placeholder="Nombre del examen/proyecto"
+                >
+
+                <select id="markSubject">
+
+                </select>
+
+
+                <input 
+                type="number"
+                id="markValue"
+                placeholder="Nota"
+                min="0"
+                max="10"
+                step="0.1"
+                >
+
+                <input 
+                type="date"
+                id="markDate"
+                >
+
+                <p class="form-error" id="formError"></p>
+
+                <div class="form-buttons">
+
+                    <button id="cancelMark">Cancelar</button>
+
+                    <button id="saveMark">Guardar</button>
+                </div>
+
+                
+            </div>
+        </div>
+
+                        <div class="modal" id="subjectMarksModal">
+
+                    <div class="subject-marks-modal">
+
+                        <div class="subject-marks-modal-header">
+
+                            <div>
+                                <h2 id="subjectMarksTitle"></h2>
+                                <p id="subjectMarksAverage"></p>
+                            </div>
+
+                            <button id="closeSubjectMarks">✕</button>
+
+                        </div>
+
+                        <div class="subject-marks-list" id="subjectMarksList">
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+
+
+    </main>
+    
+
+    <script src="script.js"></script>
+    <script src="subjects.js"></script>
+    <script src="mark.js"></script>
+</body>
+</html>
