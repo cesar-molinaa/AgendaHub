@@ -1,3 +1,18 @@
+
+
+async function comprobarSesion() {
+
+    const { data: { session } } =
+        await supabaseClient.auth.getSession();
+
+    if (session) {
+        window.location.href = "index.html";
+    }
+}
+
+comprobarSesion();
+
+
 let registerMode = false;
 
 

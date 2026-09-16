@@ -289,4 +289,27 @@ saveCourse.addEventListener("click", async () => {
     cargarCurso();
 });
 
+
+
+
+
+
+
+// CERRAR SESIÓN
+
+const logoutUser = document.getElementById("logoutUser");
+
+logoutUser.addEventListener("click", async () => {
+
+    const { error } = await supabaseClient.auth.signOut();
+
+    if (error) {
+        console.error("Error cerrando sesión:", error);
+        return;
+    }
+
+    window.location.href = "login.html";
+});
+
+
 cargarCurso();

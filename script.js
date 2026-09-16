@@ -1,4 +1,19 @@
 
+
+async function comprobarUsuario() {
+
+    const { data: { session } } =
+        await supabaseClient.auth.getSession();
+
+    if (!session) {
+        window.location.href = "login.html";
+    }
+}
+
+comprobarUsuario();
+
+
+
 //BOTON SIDEBAR
 
 const menuBtn = document.getElementById("menuBtn");
