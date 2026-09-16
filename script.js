@@ -2,8 +2,20 @@
 
 async function comprobarUsuario() {
 
-    const { data: { session } } =
+    const paginaActual = window.location.pathname;
+
+    // No comprobar la sesión en login.html
+    if (paginaActual.includes("login.html")) {
+        return;
+    }
+
+    const { data: { session }, error } =
         await supabaseClient.auth.getSession();
+
+    if (error) {
+        console.error("Error comprobando sesión:", error);
+        return;
+    }
 
     if (!session) {
         window.location.href = "login.html";
@@ -11,6 +23,10 @@ async function comprobarUsuario() {
 }
 
 comprobarUsuario();
+
+
+
+
 
 
 
