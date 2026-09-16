@@ -4,10 +4,15 @@
 const menuBtn = document.getElementById("menuBtn");
 const sidebar = document.getElementById("sidebar");
 
-menuBtn.addEventListener("click", () => {
+
+if(menuBtn){
+
+    menuBtn.addEventListener("click", () => {
 
     sidebar.classList.toggle("hide");
 })
+}
+
 
 
 // CERRAR MODALES AL HACER CLICK FUERA
@@ -25,3 +30,33 @@ document.querySelectorAll(".modal").forEach(modal => {
 });
 
 
+
+const userIcon = document.getElementById("userIcon");
+
+userIcon.addEventListener("click", () => {
+    
+    window.location.href = "user.html";
+})
+
+
+//FOTO USER
+
+async function cargarFotoUsuario() {
+
+    const userIcon = document.getElementById("userIcon");
+
+    if (!userIcon) return;
+
+    const { data: { user }, error } =
+    await supabaseClient.auth.getUser();
+
+    if (error || !user) return;
+
+    const avatar = user.user_metadata?.avatar;
+
+    if(avatar) {
+        userIcon.src = avatar;
+    }
+}
+
+cargarFotoUsuario();

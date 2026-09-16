@@ -50,7 +50,44 @@ cancelEvent.addEventListener("click", () => {
 
 //ELEMENTOS DEL MODAL DE CREAR EVENTO
 
-let eventos = JSON.parse(localStorage.getItem("eventos")) || [];
+let eventos = [];
+
+async function loadEvents() {
+
+    const { data, error } = await supabaseClient
+        .from("events")
+        .select("*")
+        .order("date", { ascending: true })
+        .order("time", { ascending: true });
+
+    if (error) {
+        console.error("Error cargando eventos:", error);
+        return;
+    }
+
+    eventos = (data || []).map(evento => ({
+        id: evento.id,
+        titulo: evento.title,
+        asignatura: evento.subject_id,
+        calendario: evento.calendar_id,
+        fecha: evento.date,
+        hora: evento.time,
+        descripcion: evento.description
+    }));
+
+
+    if (vistaActual === "month") {
+        mostrarCalendario();
+    }
+
+    if (vistaActual === "week") {
+        mostrarSemana();
+    }
+
+    if (vistaActual === "day") {
+        mostrarDia();
+    }
+}
 
 const eventFormTitle = document.getElementById("eventFormTitle");
 
@@ -80,18 +117,71 @@ function getSubjectById(subjectId) {
 
 //FUNCIONAMIENTO DE CALENDARIOS (AÑADIR/QUITAR) --------------------------------------------------------------------------------------------------------------------------------------------
 
-let calendarios = JSON.parse(localStorage.getItem("calendarios")) || [
-    {
-        id: "bachillerato",
-        nombre: "Bachillerato",
-        visible: true
-    },
-    {
-        id: "personal",
-        nombre: "Personal",
-        visible: true
+let calendarios = [];
+
+async function loadCalendars() {
+
+    const { data, error } = await supabaseClient
+        .from("calendars")
+        .select("*")
+        .order("created_at", { ascending: true });
+
+    if (error) {
+        console.error("Error cargando calendarios:", error);
+        return;
     }
-];
+
+    calendarios = data.map(calendario => ({
+        id: calendario.id,
+        nombre: calendario.name,
+        visible: calendario.visible
+    }));
+
+    // Si el usuario todavía no tiene calendarios,
+    // crear los dos iniciales
+    if (calendarios.length === 0) {
+
+        const { data: { user } } = await supabaseClient.auth.getUser();
+
+        if (!user) {
+            console.error("No hay ningún usuario conectado.");
+            return;
+        }
+
+        const { data: nuevosCalendarios, error: insertError } =
+            await supabaseClient
+                .from("calendars")
+                .insert([
+                    {
+                        user_id: user.id,
+                        name: "Bachillerato",
+                        visible: true
+                    },
+                    {
+                        user_id: user.id,
+                        name: "Personal",
+                        visible: true
+                    }
+                ])
+                .select();
+
+        if (insertError) {
+            console.error("Error creando calendarios iniciales:", insertError);
+            return;
+        }
+
+        calendarios = nuevosCalendarios.map(calendario => ({
+            id: calendario.id,
+            nombre: calendario.name,
+            visible: calendario.visible
+        }));
+    }
+
+    mostrarCalendarios();
+    cargarCalendariosEnSelect();
+
+    await loadEvents();
+}
 
 const addCalendar = document.getElementById("addCalendar");
 const calendarList = document.getElementById("calendarList");
@@ -143,14 +233,21 @@ function mostrarCalendarios() {
 
         const checkbox = calendarItem.querySelector(".calendar-checkbox");
 
-        checkbox.addEventListener("change", () => {
+        checkbox.addEventListener("change", async () => {
 
             calendario.visible = checkbox.checked;
 
-            localStorage.setItem(
-                "calendarios",
-                JSON.stringify(calendarios)
-            );
+            const { error } = await supabaseClient
+                .from("calendars")
+                .update({
+                    visible: calendario.visible
+                })
+                .eq("id", calendario.id);
+
+            if (error) {
+                console.error("Error actualizando calendario:", error);
+                return;
+            }
 
             actualizarVistaCalendario();
 
@@ -218,7 +315,7 @@ cancelCalendar.addEventListener("click", () => {
 
 //GUARDAR CALENDARIO NUEVO
 
-saveCalendar.addEventListener("click", () => {
+saveCalendar.addEventListener("click", async () => {
 
     const nombre = calendarName.value.trim();
 
@@ -253,31 +350,36 @@ saveCalendar.addEventListener("click", () => {
 
     }
 
-    // CREAR CALENDARIO
+    const { data: { user } } = await supabaseClient.auth.getUser();
 
-    const nuevoCalendario = {
+    if (!user) {
+        console.error("No hay ningún usuario conectado.");
+        return;
+    }
 
-        id: Date.now().toString(),
+    const { data, error } = await supabaseClient
+        .from("calendars")
+        .insert({
+            user_id: user.id,
+            name: nombre,
+            visible: true
+        })
+        .select()
+        .single();
 
-        nombre: nombre,
+    if (error) {
+        console.error("Error creando calendario:", error);
+        return;
+    }
 
-        visible: true
-
-    };
-
-    calendarios.push(nuevoCalendario);
-
-
-    localStorage.setItem(
-        "calendarios",
-        JSON.stringify(calendarios)
-    );
-
+    calendarios.push({
+        id: data.id,
+        nombre: data.name,
+        visible: data.visible
+    });
 
     mostrarCalendarios();
-
     cargarCalendariosEnSelect();
-
 
     // CERRAR MODAL
 
@@ -289,7 +391,7 @@ saveCalendar.addEventListener("click", () => {
 
 //ELIMINAR CALENDARIO Y SUS EVENTOS
 
-function eliminarCalendario(id) {
+async function eliminarCalendario(id) {
 
     const calendario = calendarios.find(
         calendario => calendario.id === id
@@ -307,41 +409,48 @@ function eliminarCalendario(id) {
         return;
     }
 
-    // ELIMINAR CALENDARIO
+
+    // ELIMINAR LOS EVENTOS DE ESTE CALENDARIO
+
+    const { error: eventsError } = await supabaseClient
+        .from("events")
+        .delete()
+        .eq("calendar_id", id);
+
+    if (eventsError) {
+        console.error("Error eliminando eventos:", eventsError);
+        return;
+    }
+
+
+    // ELIMINAR EL CALENDARIO
+
+    const { error: calendarError } = await supabaseClient
+        .from("calendars")
+        .delete()
+        .eq("id", id);
+
+    if (calendarError) {
+        console.error("Error eliminando calendario:", calendarError);
+        return;
+    }
+
+
+    // ACTUALIZAR LA INFORMACIÓN LOCAL DE LA INTERFAZ
 
     calendarios = calendarios.filter(
         calendario => calendario.id !== id
     );
-
-
-    // ELIMINAR SUS EVENTOS
 
     eventos = eventos.filter(
         evento => evento.calendario !== id
     );
 
 
-    // GUARDAR CAMBIOS
-
-    localStorage.setItem(
-        "calendarios",
-        JSON.stringify(calendarios)
-    );
-
-    localStorage.setItem(
-        "eventos",
-        JSON.stringify(eventos)
-    );
-
-
     // ACTUALIZAR INTERFAZ
 
     mostrarCalendarios();
-
     cargarCalendariosEnSelect();
-
-
-    // ACTUALIZAR CALENDARIO
 
     if (vistaActual === "month") {
         mostrarCalendario();
@@ -408,11 +517,14 @@ const deleteEvent = document.getElementById("deleteEvent");
 
 //GUARDAR INFORMACION DE EVENTO EN LOCAL STORAGE
 
-saveEvent.addEventListener("click", () => {
+saveEvent.addEventListener("click", async () => {
 
     const titulo = eventTitle.value.trim();
     const asignatura = eventSubject.value;
+    const calendario = eventCalendar.value;
     const fecha = eventDate.value;
+    const hora = eventTime.value;
+    const descripcion = eventDescription.value.trim();
 
     formError.classList.remove("show");
 
@@ -432,7 +544,7 @@ saveEvent.addEventListener("click", () => {
         return;
     }
 
-    if (eventCalendar.value === "") {
+    if (calendario === "") {
 
         formError.textContent = "Selecciona un calendario";
         formError.classList.add("show");
@@ -448,38 +560,106 @@ saveEvent.addEventListener("click", () => {
         return;
     }
 
-    const evento = {
 
-    id: Date.now(),
+    // COMPROBAR USUARIO
 
-    titulo: titulo,
-    asignatura: asignatura,
-    calendario: eventCalendar.value,
-    fecha: fecha,
-    hora: eventTime.value,
-    descripcion: eventDescription.value
+    const { data: { user } } = await supabaseClient.auth.getUser();
 
-    };
+    if (!user) {
+
+        console.error("No hay ningún usuario conectado.");
+
+        return;
+    }
+
+
+    // EDITAR EVENTO
 
     if (editandoEvento) {
 
-        eventoSeleccionado.titulo = evento.titulo;
-        eventoSeleccionado.asignatura = evento.asignatura;
-        eventoSeleccionado.calendario = evento.calendario;
-        eventoSeleccionado.fecha = evento.fecha;
-        eventoSeleccionado.hora = evento.hora;
-        eventoSeleccionado.descripcion = evento.descripcion;
+        const { data, error } = await supabaseClient
+            .from("events")
+            .update({
+                title: titulo,
+                subject_id: asignatura,
+                calendar_id: calendario,
+                date: fecha,
+                time: hora || null,
+                description: descripcion || null
+            })
+            .eq("id", eventoSeleccionado.id)
+            .select()
+            .single();
 
-    } else {
 
-        eventos.push(evento);
+        if (error) {
+
+            console.error("Error actualizando evento:", error);
+
+            return;
+        }
+
+
+        // ACTUALIZAR EL EVENTO QUE YA TENEMOS EN MEMORIA
+
+        eventoSeleccionado.titulo = data.title;
+        eventoSeleccionado.asignatura = data.subject_id;
+        eventoSeleccionado.calendario = data.calendar_id;
+        eventoSeleccionado.fecha = data.date;
+        eventoSeleccionado.hora = data.time;
+        eventoSeleccionado.descripcion = data.description;
 
     }
 
 
-    localStorage.setItem("eventos", JSON.stringify(eventos));
+    // CREAR EVENTO
+
+    else {
+
+        const { data, error } = await supabaseClient
+            .from("events")
+            .insert({
+                user_id: user.id,
+                title: titulo,
+                subject_id: asignatura,
+                calendar_id: calendario,
+                date: fecha,
+                time: hora || null,
+                description: descripcion || null
+            })
+            .select()
+            .single();
+
+
+        if (error) {
+
+            console.error("Error creando evento:", error);
+
+            return;
+        }
+
+
+        // CONVERTIR EL EVENTO DE SUPABASE AL FORMATO DEL CALENDARIO
+
+        eventos.push({
+            id: data.id,
+            titulo: data.title,
+            asignatura: data.subject_id,
+            calendario: data.calendar_id,
+            fecha: data.date,
+            hora: data.time,
+            descripcion: data.description
+        });
+
+    }
+
+
+    // CERRAR MODAL
 
     eventModal.classList.remove("show");
+
+
+    // ACTUALIZAR CALENDARIO
 
     if (vistaActual === "month") {
         mostrarCalendario();
@@ -492,7 +672,8 @@ saveEvent.addEventListener("click", () => {
     if (vistaActual === "day") {
         mostrarDia();
     }
-})
+
+});
 
 
 
@@ -715,7 +896,12 @@ function mostrarCalendario() {
                 eventoSeleccionado = evento;
 
                 infoTitle.textContent = evento.titulo;
-                infoSubject.textContent = evento.asignatura;
+
+                const subject = getSubjectById(evento.asignatura);
+                infoSubject.textContent = subject
+                ? subject.name
+                : "Sin asignatura";
+
                 infoDate.textContent = evento.fecha;
                 infoTime.textContent = evento.hora || "Sin hora";
                 infoDescription.textContent =
@@ -919,7 +1105,10 @@ function mostrarSemana() {
 
                 infoTitle.textContent = evento.titulo;
 
-                infoSubject.textContent = evento.asignatura;
+                const subject = getSubjectById(evento.asignatura);  
+                infoSubject.textContent = subject
+                ? subject.name
+                : "Sin asignatura";
 
                 infoDate.textContent = evento.fecha;
 
@@ -1089,7 +1278,10 @@ function mostrarDia() {
 
             infoTitle.textContent = evento.titulo;
 
-            infoSubject.textContent = evento.asignatura;
+            const subject = getSubjectById(evento.asignatura);
+            infoSubject.textContent = subject
+            ? subject.name
+            : "Sin asignatura";
 
             infoDate.textContent = evento.fecha;
 
@@ -1174,10 +1366,9 @@ nextMonth.addEventListener("click", () => {
 });
 
 
-mostrarCalendario();
 
-mostrarCalendarios();
-cargarCalendariosEnSelect();
+mostrarCalendario();
+loadCalendars();
 
 
 
@@ -1217,17 +1408,40 @@ editEvent.addEventListener("click", () => {
 
 //BOTON DE ELIMINAR EVENTO
 
-deleteEvent.addEventListener("click", () => {
+deleteEvent.addEventListener("click", async () => {
 
     if (!confirm("¿Quieres eliminar este evento?")) {
-    return;
+        return;
     }
 
-    eventos = eventos.filter(evento => evento !== eventoSeleccionado);
 
-    localStorage.setItem("eventos", JSON.stringify(eventos));
+    const { error } = await supabaseClient
+        .from("events")
+        .delete()
+        .eq("id", eventoSeleccionado.id);
+
+
+    if (error) {
+
+        console.error("Error eliminando evento:", error);
+
+        return;
+    }
+
+
+    // ELIMINARLO DE LA INFORMACIÓN QUE TENEMOS EN MEMORIA
+
+    eventos = eventos.filter(
+        evento => evento.id !== eventoSeleccionado.id
+    );
+
+
+    eventoSeleccionado = null;
 
     eventInfoModal.classList.remove("show");
+
+
+    // ACTUALIZAR CALENDARIO
 
     if (vistaActual === "month") {
         mostrarCalendario();
@@ -1275,7 +1489,3 @@ todayBtn.addEventListener("click", () => {
 
 
 
-
-
-
-loadSubjectsIntoSelect("eventSubject");

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgendaHub</title>
+    <link rel="icon" href="imgs/agendahub-icon.png" type="image/x-icon">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+
+    <main class="login-main">
+
+        <div class="login-card">
+
+            <h1 id="authTitle">Iniciar Sesión</h1>
+            <p id="authSubtitle">Entra en tu cuenta de AgendaHub</p>
+
+            <form id="authForm">
+
+                <div class="auth-field">
+                    <label for="email">Correo electrónico</label>
+                    <input type="email" id="email" required>
+                </div>
+
+                <div class="auth-field">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" required>
+                </div>
+
+                <div class="auth-field" id="nameField" style="display: none;">
+                    <label for="name">Nombre</label>
+                    <input type="text" id="name">
+                </div>
+
+                <div class="auth-field" id="courseField" style="display: none;">
+                    <label for="course">Curso</label>
+                    <input type="text" id="course">
+                </div>
+
+                <p id="authError"></p>
+
+                <button type="submit" id="authButton">
+                    Iniciar sesión
+                </button>
+
+            </form>
+
+            <button type="button" id="changeAuthMode">
+                ¿No tienes una cuenta? Crear cuenta
+            </button>
+
+        </div>
+
+    </main>
+
+
+
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+
+    <script src="login.js"></script>
+</body>
+</html>

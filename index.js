@@ -1,11 +1,98 @@
 //DATOS DE AGENDAHUB
 
-let subjects = JSON.parse(localStorage.getItem("agendahub-subjects")) || [];
-let events = JSON.parse(localStorage.getItem("eventos")) || [];
-let tasks = JSON.parse(localStorage.getItem("agendahub-tasks")) || [];
-let marks = JSON.parse(localStorage.getItem("agendahub-marks")) || [];
+let subjects = [];
+let events = [];
+let tasks = [];
+let marks = [];
 
+async function loadDashboardData() {
 
+    const [
+        subjectsResult,
+        eventsResult,
+        tasksResult,
+        marksResult
+    ] = await Promise.all([
+
+        supabaseClient
+            .from("subjects")
+            .select("*")
+            .order("created_at", { ascending: true }),
+
+        supabaseClient
+            .from("events")
+            .select("*")
+            .order("date", { ascending: true })
+            .order("time", { ascending: true }),
+
+        supabaseClient
+            .from("tasks")
+            .select("*")
+            .order("date", { ascending: true })
+            .order("time", { ascending: true }),
+
+        supabaseClient
+            .from("marks")
+            .select("*")
+            .order("date", { ascending: false })
+    ]);
+
+    if (subjectsResult.error) {
+        console.error("Error cargando asignaturas:", subjectsResult.error);
+        return;
+    }
+
+    if (eventsResult.error) {
+        console.error("Error cargando eventos:", eventsResult.error);
+        return;
+    }
+
+    if (tasksResult.error) {
+        console.error("Error cargando tareas:", tasksResult.error);
+        return;
+    }
+
+    if (marksResult.error) {
+        console.error("Error cargando calificaciones:", marksResult.error);
+        return;
+    }
+
+    subjects = subjectsResult.data || [];
+
+    events = (eventsResult.data || []).map(event => ({
+        id: event.id,
+        titulo: event.title,
+        asignatura: event.subject_id,
+        calendario: event.calendar_id,
+        fecha: event.date,
+        hora: event.time,
+        descripcion: event.description
+    }));
+
+    tasks = (tasksResult.data || []).map(task => ({
+        id: task.id,
+        title: task.title,
+        subject: task.subject_id,
+        date: task.date,
+        time: task.time,
+        description: task.description,
+        status: task.status
+    }));
+
+    marks = (marksResult.data || []).map(mark => ({
+        id: mark.id,
+        title: mark.title,
+        subject: mark.subject_id,
+        value: Number(mark.value),
+        date: mark.date
+    }));
+
+    renderUpcomingEvents();
+    renderDashboardTasks();
+    renderDashboardAverage();
+    renderDashboardSubjects();
+    renderCourseCountdown();
+}
 
 
 //BUSCAR ASIGNATURA
@@ -237,9 +324,42 @@ function renderDashboardSubjects() {
 
 
 
+//CUENTA ATRÁS
+
+async function renderCourseCountdown() {
+
+    const countdown = document.getElementById("courseCountdown");
+    if(!countdown) return;
+
+    const { data: { user }, error } =
+        await supabaseClient.auth.getUser();
+
+    if (error || !user) return;
+
+    const inicio = user.user_metadata?.course_start;
+    const final = user.user_metadata?.course_end;
 
 
-renderUpcomingEvents();
-renderDashboardTasks();
-renderDashboardAverage();
-renderDashboardSubjects();
+    if(!inicio || !final) {
+        countdown.textContent = "--";
+        return;
+    }
+
+    const hoy = new Date();
+    const fechaFinal = new Date(final);
+
+    const diferencia = fechaFinal - hoy;
+    const dias = Math.ceil(diferencia / (1000* 60 * 60 * 24));
+
+    if (dias > 0) {
+        countdown.innerHTML = `
+        
+            <strong>${dias}</strong>
+            <span>días</span>
+        `;
+    } else {
+        countdown.textContent = "FIN :)"
+    }
+}
+
+loadDashboardData();

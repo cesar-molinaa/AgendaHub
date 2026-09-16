@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgendaHub</title>
+    <link rel="icon" href="imgs/agendahub-icon.png" type="image/x-icon">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <header>
+
+        <div class="main">
+            <h1>AgendaHub</h1>
+        </div>
+
+        <div class="buttons">
+            <img src="imgs/volver.png" alt="back" id="back">
+            <img src="imgs/user.png" alt="user" id="userIcon">
+        </div>
+
+    </header>
+
+
+    <main>
+
+        <div class="user-space" id="user-space">
+
+
+            <div class="user-card" id="perfilCard">
+
+                <img src="" id="userImg">
+                <h1 id="userName">Tu nombre</h1>
+                <h4 id="userCourse">Curso que haces</h4>
+                <p id="userEmail">email</p>
+                <button id="editarUser">Editar</button>
+            </div>
+
+
+            <div class="user-card" id="courseCard">
+                <h2>Mi curso</h2>
+
+                <span class="edit-hint">Haz clic para editar</span>
+
+                <h3 id="miCurso">Curso que haces</h3>
+
+                <h4>
+                    Duración:
+                    <span id="courseDate">09/09 - 21/06</span>
+                </h4>
+
+                <div class="mark-progress">
+                    <div class="mark-progress-fill" id="courseProgressBar"></div>
+                </div>
+
+                <h4>
+                    <span id="courseProgress">0%</span>
+                    del curso completado
+                </h4>
+            </div>
+
+
+            <div class="user-card">
+
+                <div class="habit-header">
+                    <h2>Hábitos</h2>
+                    <button id="newHabit">Nuevo hábito</button>
+                </div>
+                
+
+                <ul id="habitList">
+                    <li>1 hábito</li>
+                    <li>2 hábitos</li>
+                    <li>3 hábitos</li>
+                    <li>4 hábitos</li>
+                </ul>
+
+                <h4>Racha: <span id="racha">38</span> días</h4>
+            </div>
+
+
+            <div class="user-card">
+
+                <h2>Estadísticas</h2>
+
+                <p>jshdfasdjhfasdhf</p>
+                <p>jshdfasdjhfasdhf</p>
+                <p>jshdfasdjhfasdhf</p>
+                <p>jshdfasdjhfasdhf</p>
+                <p>jshdfasdjhfasdhf</p>
+                <p>jshdfasdjhfasdhf</p>
+                <p>jshdfasdjhfasdhf</p>
+                <p>jshdfasdjhfasdhf</p>
+                <p>jshdfasdjhfasdhf</p>
+                <p>jshdfasdjhfasdhf</p>
+            </div>
+
+
+            <div class="user-card">
+                <h2>Personalizar</h2>
+            </div>
+
+
+        </div>
+
+
+
+        <div class="modal" id="userModal">
+            <div class="task-form">
+                <h2>Editar perfil</h2>
+
+                <input type="text" id="editUserName" placeholder="Tu nombre">
+
+                <input type="text" id="editUserCourse" placeholder="Tu curso">
+
+                <label for="editUserImage">Foto de perfil</label>
+                <input type="file" id="editUserImage" accept="image/*">
+
+                <p class="form-error" id="userFormError"></p>
+
+                <div class="form-buttons">
+                    <button id="cancelUserEdit">Cancelar</button>
+                    <button id="saveUserEdit">Guardar</button>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal" id="courseModal">
+            <div class="task-form">
+                <h2>Configurar curso</h2>
+
+                <label for="courseStart">Fecha de inicio</label>
+                <input type="date" id="courseStart">
+
+                <label for="courseEnd">Fecha de finalización</label>
+                <input type="date" id="courseEnd">
+
+                <p class="form-error" id="courseFormError"></p>
+
+                <div class="form-buttons">
+                    <button id="cancelCourse">Cancelar</button>
+                    <button id="saveCourse">Guardar</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+
+    <script src="script.js"></script>
+    <script src="user.js"></script>
+</body>
+</html>

@@ -1,8 +1,30 @@
-let marks = JSON.parse(localStorage.getItem("agendahub-marks")) || [];
+let marks = [];
 
-function saveMarks() {
-    localStorage.setItem("agendahub-marks", JSON.stringify(marks));
+async function loadMarks() {
+
+    const { data, error } = await supabaseClient
+        .from("marks")
+        .select("*")
+        .order("date", { ascending: false })
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        console.error("Error cargando calificaciones:", error);
+        return;
+    }
+
+    marks = (data || []).map(mark => ({
+        id: mark.id,
+        title: mark.title,
+        subject: mark.subject_id,
+        value: Number(mark.value),
+        date: mark.date
+    }));
+
+    renderMarks();
+    renderGeneralAverage();
 }
+
 
 let selectedSubject = null;
 
@@ -34,7 +56,7 @@ cancelmarkButton.addEventListener("click", () => {
 
 const saveMark = document.getElementById("saveMark");
 
-saveMark.addEventListener("click", () => {
+saveMark.addEventListener("click", async () => {
 
     const title = document.getElementById("markTitle").value.trim();
     const subject = document.getElementById("markSubject").value;
@@ -88,22 +110,30 @@ saveMark.addEventListener("click", () => {
 
     }
 
-    const mark = {
+    const { data, error } = await supabaseClient
+        .from("marks")
+        .insert({
+            user_id: (await supabaseClient.auth.getUser()).data.user.id,
+            subject_id: subject,
+            title: title,
+            value: value,
+            date: date
+        })
+        .select()
+        .single();
 
-        id: Date.now(),
-
-        title: title,
-
-        subject: subject,
-
-        value: value,
-
-        date: date
+    if (error) {
+        console.error("Error creando calificación:", error);
+        return;
     }
 
-    marks.push(mark);
-
-    saveMarks();
+    marks.push({
+        id: data.id,
+        title: data.title,
+        subject: data.subject_id,
+        value: Number(data.value),
+        date: data.date
+    });
 
     renderMarks();
     renderGeneralAverage();
@@ -138,8 +168,6 @@ function renderMarks() {
 
         return;
     }
-
-    const subjects = JSON.parse(localStorage.getItem("agendahub-subjects")) || [];
 
 
     subjects.forEach(subject => {
@@ -302,7 +330,7 @@ function renderSubjectMarks() {
                 </strong>
             `;
 
-            markCard.addEventListener("click", () => {
+            markCard.addEventListener("click", async () => {
 
                 const confirmDelete = confirm(
                     `¿Quieres eliminar la nota "${mark.title}"?`
@@ -312,9 +340,17 @@ function renderSubjectMarks() {
                     return;
                 }
 
-                marks = marks.filter(item => item.id !== mark.id);
+                const { error } = await supabaseClient
+                    .from("marks")
+                    .delete()
+                    .eq("id", mark.id);
 
-                saveMarks();
+                if (error) {
+                    console.error("Error eliminando calificación:", error);
+                    return;
+                }
+
+                marks = marks.filter(item => item.id !== mark.id);
 
                 renderMarks();
                 renderGeneralAverage();
@@ -357,7 +393,4 @@ subjectMarksModal.addEventListener("click", (event) => {
 
 
 
-loadSubjectsIntoSelect("markSubject");
-
-renderMarks();
-renderGeneralAverage();
+loadMarks();

@@ -2,11 +2,37 @@
 //SISTEMA DE TAREAS-----------------------------------------------------------------------------------------------------------------------------------------------
 
 
-let tasks = JSON.parse(localStorage.getItem("agendahub-tasks")) || [];
+let tasks = [];
 
-function saveTasks() {
-    localStorage.setItem("agendahub-tasks", JSON.stringify(tasks));
+async function loadTasks() {
+
+    const { data, error } = await supabaseClient
+        .from("tasks")
+        .select("*")
+        .order("date", { ascending: true })
+        .order("time", { ascending: true });
+
+    if (error) {
+        console.error("Error cargando tareas:", error);
+        return;
+    }
+
+    tasks = (data || []).map(task => ({
+        id: task.id,
+        title: task.title,
+        subject: task.subject_id,
+        date: task.date,
+        time: task.time,
+        description: task.description,
+        status: task.status
+    }));
+
+    renderTasks();
+    renderTomorrowTasks();
+    renderPendingTasks();
+    updateTaskCounters();
 }
+
 
 const taskModal = document.getElementById("taskModal");
 
@@ -57,22 +83,45 @@ let editingTask = false;
 
 //CREAR TAREAS-----------------------------------------------------------------------------------------------------------------------------------------------
 
-function createTask(title, subject, date, time, description) {
+async function createTask(title, subject, date, time, description) {
 
-    const task = {
+    const { data: { user } } = await supabaseClient.auth.getUser();
 
-        id: Date.now(),
-        title: title,
-        subject: subject,
-        date: date,
-        time,
-        description: description,
-        status: "pending"
+    if (!user) {
+        console.error("No hay ningún usuario conectado.");
+        return false;
     }
 
-    tasks.push(task);
+    const { data, error } = await supabaseClient
+        .from("tasks")
+        .insert({
+            user_id: user.id,
+            subject_id: subject || null,
+            title: title,
+            date: date,
+            time: time || null,
+            description: description || null,
+            status: "pending"
+        })
+        .select()
+        .single();
 
-    saveTasks();
+    if (error) {
+        console.error("Error creando tarea:", error);
+        return false;
+    }
+
+    tasks.push({
+        id: data.id,
+        title: data.title,
+        subject: data.subject_id,
+        date: data.date,
+        time: data.time,
+        description: data.description,
+        status: data.status
+    });
+
+    return true;
 }
 
 
@@ -103,7 +152,7 @@ cancelTaskButton.addEventListener("click", () => {
 const saveTaskButton = document.getElementById("saveTask");
 
 
-saveTaskButton.addEventListener("click", () => {
+saveTaskButton.addEventListener("click", async () => {
 
     const title = document.getElementById("taskTitle").value.trim();
     const subject = document.getElementById("taskSubject").value;
@@ -114,19 +163,48 @@ saveTaskButton.addEventListener("click", () => {
 
     if (editingTask) {
 
-        taskSelected.title = title;
-        taskSelected.subject = subject;
-        taskSelected.date = date;
-        taskSelected.time = time;
-        taskSelected.description = description;
+        const { data, error } = await supabaseClient
+            .from("tasks")
+            .update({
+                title: title,
+                subject_id: subject || null,
+                date: date,
+                time: time || null,
+                description: description || null
+            })
+            .eq("id", taskSelected.id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error("Error actualizando tarea:", error);
+            return;
+        }
+
+        taskSelected.title = data.title;
+        taskSelected.subject = data.subject_id;
+        taskSelected.date = data.date;
+        taskSelected.time = data.time;
+        taskSelected.description = data.description;
 
         editingTask = false;
 
     } else {
 
-        createTask(title, subject, date, time, description);
+        const created = await createTask(
+            title,
+            subject,
+            date,
+            time,
+            description
+        );
 
-    }
+        if (!created) {
+            return;
+        }
+
+    };
+    
 
     renderTasks();
     renderTomorrowTasks();
@@ -223,13 +301,25 @@ function addStatusMenu(taskCard, task) {
 
         statusMenu.querySelectorAll("button").forEach(button => {
 
-            button.addEventListener("click", (event) => {
+            button.addEventListener("click", async (event) => {
 
                 event.stopPropagation();
 
-                task.status = button.dataset.status;
+                const newStatus = button.dataset.status;
 
-                saveTasks();
+                const { error } = await supabaseClient
+                    .from("tasks")
+                    .update({
+                        status: newStatus
+                    })
+                    .eq("id", task.id);
+
+                if (error) {
+                    console.error("Error actualizando estado:", error);
+                    return;
+                }
+
+                task.status = newStatus;
 
                 renderTasks();
                 renderTomorrowTasks();
@@ -405,7 +495,7 @@ function renderTomorrowTasks() {
     }
 
     tomorrowTasks
-    .sort((a, b) => a.time.localeCompare(b.time))
+    .sort((a, b) =>(a.time || "").localeCompare(b.time || ""))
     .forEach(task => {
 
         const taskCard = document.createElement("div");
@@ -598,15 +688,23 @@ editTask.addEventListener("click", () => {
 
 //ELIMINAR TAREA CON BOTON EN INFO MODAL--------------------------------------------------------
 
-deleteTask.addEventListener("click", () => {
+deleteTask.addEventListener("click", async () => {
 
     if (!confirm("¿Quieres eliminar esta tarea?")) {
         return;
     }
 
-    tasks = tasks.filter(task => task !== taskSelected);
+    const { error } = await supabaseClient
+        .from("tasks")
+        .delete()
+        .eq("id", taskSelected.id);
 
-    saveTasks();
+    if (error) {
+        console.error("Error eliminando tarea:", error);
+        return;
+    }
+
+    tasks = tasks.filter(task => task.id !== taskSelected.id);
 
     taskInfoModal.classList.remove("show");
 
@@ -626,8 +724,4 @@ deleteTask.addEventListener("click", () => {
 
 
 
-renderTasks();
-renderTomorrowTasks();
-renderPendingTasks();
-updateTaskCounters();
-loadSubjectsIntoSelect("taskSubject");
+loadTasks();

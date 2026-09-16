@@ -1,11 +1,27 @@
 //SISTEMA DE ASIGNATURAS
 
-let subjects = JSON.parse( localStorage.getItem("agendahub-subjects") ) || [];
+let subjects = [];
 
-function saveSubjects() {
+async function loadSubjects() {
 
-    localStorage.setItem( "agendahub-subjects", JSON.stringify(subjects) );
+    const { data, error } = await supabaseClient
+        .from("subjects")
+        .select("*")
+        .order("created_at", { ascending: true });
 
+    if (error) {
+        console.error("Error cargando asignaturas:", error);
+        return;
+    }
+
+    subjects = data || [];
+
+    renderSubjects();
+
+    loadSubjectsIntoSelect("taskSubject");
+    loadSubjectsIntoSelect("examSubject");
+    loadSubjectsIntoSelect("eventSubject");
+    loadSubjectsIntoSelect("markSubject");
 }
 
 
@@ -53,31 +69,42 @@ document.querySelectorAll(".modal").forEach(modal => {
 
 //CREAR NUEVA ASIGNATURA----------------------------------------------------------------------------------------------------------------------------------------
 
-function createSubject(name, color) {
+async function createSubject(name, color) {
 
-    const subject = {
+    const { data: { user } } = await supabaseClient.auth.getUser();
 
-        id: Date.now(),
+    if (!user) {
+        console.error("No hay ningún usuario conectado.");
+        return false;
+    }
 
-        name: name,
+    const { data, error } = await supabaseClient
+        .from("subjects")
+        .insert({
+            user_id: user.id,
+            name: name,
+            color: color,
+            teacher: "",
+            classroom: "",
+            background: "",
+            description: ""
+        })
+        .select()
+        .single();
 
-        color: color,
+    if (error) {
+        console.error("Error creando asignatura:", error);
+        return false;
+    }
 
-        teacher: "",
+    subjects.push(data);
 
-        classroom: "",
+    renderSubjects();
 
-        background: "",
-
-        description: "",
-
-    };
-
-    subjects.push(subject);
-
-    saveSubjects();
-
+    return true;
 }
+
+
 
 const newSubjectButton = document.getElementById("newSubject");
 
@@ -88,48 +115,52 @@ const cancelSubjectButton = document.getElementById("cancelSubject");
 const saveSubjectButton = document.getElementById("saveSubject");
 
 
-//BOTON QUE ABRE EL MODAL DE CREAR ASIGNATURA-----------------------------------------------
+// ESTOS ELEMENTOS SOLO EXISTEN EN subjects.html
 
-newSubjectButton.addEventListener("click", () => {
+if (newSubjectButton) {
 
-    subjectModal.classList.add("show");
-})
+    newSubjectButton.addEventListener("click", () => {
+        subjectModal.classList.add("show");
+    });
 
-
-//BOTON QUE CIERRA EL MODAL DE CREAR ASIGNATURA---------------------------------------------------
-
-cancelSubjectButton.addEventListener("click", () => {
-
-    subjectModal.classList.remove("show");
-
-});
+}
 
 
-//GUARDAR NUEVA ASIGNATURA--------------------------------------------------------------------
+if (cancelSubjectButton) {
 
-saveSubjectButton.addEventListener("click", () => {
+    cancelSubjectButton.addEventListener("click", () => {
+        subjectModal.classList.remove("show");
+    });
 
-    const name = document.getElementById("newSubjectName").value.trim();
-
-    const color = document.getElementById("newSubjectColor").value;
-
-
-    if (!name) {
-
-        return;
-
-    }
+}
 
 
-    createSubject(name, color);
+if (saveSubjectButton) {
 
-    renderSubjects();
+    saveSubjectButton.addEventListener("click", async () => {
 
-    subjectModal.classList.remove("show");
+        const name = document.getElementById("newSubjectName").value.trim();
 
-    document.getElementById("newSubjectName").value = "";
+        const color = document.getElementById("newSubjectColor").value;
 
-});
+        if (!name) {
+            return;
+        }
+
+        const created = await createSubject(name, color);
+
+        if (!created) {
+            return;
+        }
+
+        subjectModal.classList.remove("show");
+
+        document.getElementById("newSubjectName").value = "";
+
+    });
+
+}
+
 
 
 
@@ -140,6 +171,10 @@ saveSubjectButton.addEventListener("click", () => {
 function renderSubjects() {
     
     const subjectsFeed = document.getElementById("subjectsFeed");
+
+    if (!subjectsFeed) {
+        return;
+    }
 
     subjectsFeed.innerHTML = "";
 
@@ -293,9 +328,14 @@ function openSubject(subject) {
 
 // EDITAR NOMBRE DE LA ASIGNATURA
 
-document.getElementById("editSubjectName").addEventListener("click", () => {
+const editSubjectNameButton = document.getElementById("editSubjectName");
 
-    const editButton = document.getElementById("editSubjectName");
+if (editSubjectNameButton) {
+
+    editSubjectNameButton.addEventListener("click", async () => {
+
+    
+        const editButton = document.getElementById("editSubjectName");
     const subjectName = document.getElementById("subjectName");
 
     // GUARDAR NOMBRE
@@ -309,11 +349,19 @@ document.getElementById("editSubjectName").addEventListener("click", () => {
             return;
         }
 
-        // GUARDAR EN EL OBJETO
-        currentSubject.name = newName;
+        const { error } = await supabaseClient
+            .from("subjects")
+            .update({
+                name: newName
+            })
+            .eq("id", currentSubject.id);
 
-        // GUARDAR EN LOCALSTORAGE
-        saveSubjects();
+        if (error) {
+            console.error("Error actualizando nombre:", error);
+            return;
+        }
+
+        currentSubject.name = newName;
 
         // CREAR DE NUEVO EL H2
         const newSubjectName = document.createElement("h2");
@@ -355,14 +403,23 @@ document.getElementById("editSubjectName").addEventListener("click", () => {
     // SELECCIONAR TODO
     input.select();
 
-});
+
+    });
+
+}
+
 
 
 
 // ELIMINAR ASIGNATURA
-document.getElementById("deleteSubject").addEventListener("click", () => {
 
-    if (!currentSubject) {
+const deleteSubjectButton = document.getElementById("deleteSubject");
+
+if (deleteSubjectButton) {
+
+    deleteSubjectButton.addEventListener("click", async () => {
+
+        if (!currentSubject) {
         return;
     }
 
@@ -378,8 +435,19 @@ document.getElementById("deleteSubject").addEventListener("click", () => {
 
 
     // ELIMINAR ASIGNATURA
-    subjects = subjects.filter(subject => subject.id !== subjectId);
-    saveSubjects();
+    const { error } = await supabaseClient
+            .from("subjects")
+            .delete()
+            .eq("id", currentSubject.id);
+
+        if (error) {
+            console.error("Error eliminando asignatura:", error);
+            return;
+        }
+
+        subjects = subjects.filter(
+            subject => subject.id !== currentSubject.id
+        );
 
 
     // ELIMINAR TAREAS DE ESA ASIGNATURA
@@ -432,19 +500,27 @@ document.getElementById("deleteSubject").addEventListener("click", () => {
     loadSubjectsIntoSelect("taskSubject");
     loadSubjectsIntoSelect("examSubject");
 
-});
+    });
+
+};
+
 
 
 
 //BOTON PARA CERRAR ASIGNATURA----------------------------------------------------------------------
 
-document.getElementById("closeSubject").addEventListener("click", () => {
+const closeSubjectButton = document.getElementById("closeSubject");
 
-    document.getElementById("subjectPage").style.display = "none";
-    document.getElementById("subjectsFeed").style.display = "grid";
+if (closeSubjectButton) {
 
-});
+    closeSubjectButton.addEventListener("click", () => {
 
+        document.getElementById("subjectPage").style.display = "none";
+        document.getElementById("subjectsFeed").style.display = "grid";
+
+    });
+
+}
 
 
 
@@ -505,11 +581,21 @@ document.querySelectorAll(".edit-field").forEach(button => {
 
 
                 // BOTÓN ELIMINAR
-                deleteButton.addEventListener("click", () => {
+                deleteButton.addEventListener("click", async () => {
+
+                    const { error } = await supabaseClient
+                        .from("subjects")
+                        .update({
+                            background: ""
+                        })
+                        .eq("id", currentSubject.id);
+
+                    if (error) {
+                        console.error("Error eliminando portada:", error);
+                        return;
+                    }
 
                     currentSubject.background = "";
-
-                    saveSubjects();
 
 
                     // CREAR DE NUEVO EL TEXTO
@@ -649,9 +735,19 @@ document.querySelectorAll(".edit-field").forEach(button => {
 
 
                     // GUARDAR PORTADA
-                    currentSubject.background = imageUrl;
+                    const { error } = await supabaseClient
+                        .from("subjects")
+                        .update({
+                            background: imageUrl
+                        })
+                        .eq("id", currentSubject.id);
 
-                    saveSubjects();
+                    if (error) {
+                        console.error("Error guardando portada:", error);
+                        return;
+                    }
+
+                    currentSubject.background = imageUrl;
 
 
                     // MOSTRAR NOMBRE DEL ARCHIVO
@@ -698,9 +794,21 @@ document.querySelectorAll(".edit-field").forEach(button => {
 
             else {
 
-                currentSubject[field] = input.value.trim();
+                const newValueText = input.value.trim();
 
-                saveSubjects();
+                const { error } = await supabaseClient
+                    .from("subjects")
+                    .update({
+                        [field]: newValueText
+                    })
+                    .eq("id", currentSubject.id);
+
+                if (error) {
+                    console.error("Error actualizando asignatura:", error);
+                    return;
+                }
+
+                currentSubject[field] = newValueText;
 
 
                 const newValue = document.createElement("span");
@@ -969,4 +1077,4 @@ function renderSubjectContent() {
 
 
 
-renderSubjects();
+loadSubjects();
