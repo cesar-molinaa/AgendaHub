@@ -238,7 +238,7 @@ function loadSubjectsIntoSelect(selectId) {
 
     select.innerHTML = `
     
-    <option value="">Selecciona una asignatura</option>
+    <option value="">Sin asignatura</option>
 
     `;
 

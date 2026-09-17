@@ -396,6 +396,8 @@ function renderTasks() {
 
         if (subject) {
             taskCard.style.backgroundColor = subject.color;
+        } else {
+            taskCard.style.backgroundColor = "#F7F3E3";
         }
 
         addStatusMenu(taskCard, task);
@@ -441,6 +443,8 @@ function renderTasks() {
 
         if (subject) {
             taskCard.style.backgroundColor = subject.color;
+        } else {
+            taskCard.style.backgroundColor = "#F7F3E3";
         }
 
         addStatusMenu(taskCard, task);
@@ -506,6 +510,8 @@ function renderTomorrowTasks() {
 
         if (subject) {
             taskCard.style.backgroundColor = subject.color;
+        } else {
+            taskCard.style.backgroundColor = "#F7F3E3";
         }
 
         taskCard.addEventListener("click", () => {
@@ -571,6 +577,8 @@ function renderPendingTasks() {
 
         if (subject) {
             taskCard.style.backgroundColor = subject.color;
+        } else {
+            taskCard.style.backgroundColor = "#F7F3E3";
         }
 
 

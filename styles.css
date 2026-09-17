@@ -3313,6 +3313,7 @@ background-color: #FCB55F;
     box-shadow: 4px 4px 0 #191923;
 }
 
-#authButton:hover {
+#forgotPassword:hover {
     color: #2a2a2f;
+    font-size: .8rem;
 }

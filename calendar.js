@@ -878,6 +878,8 @@ function mostrarCalendario() {
 
             if (subject) {
                 eventElement.style.backgroundColor = subject.color;
+            } else {
+                eventElement.style.backgroundColor = "#FCB55F";
             }
 
 
@@ -1084,6 +1086,8 @@ function mostrarSemana() {
 
             if (subject) {
                 eventElement.style.backgroundColor = subject.color;
+            } else {
+                eventElement.style.backgroundColor = "#FCB55F";
             }
 
 
@@ -1257,6 +1261,8 @@ function mostrarDia() {
 
             if (subject) {
                 eventElement.style.backgroundColor = subject.color;
+            } else {
+                eventElement.style.backgroundColor = "#FCB55F";
             }
 
 
