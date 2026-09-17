@@ -3312,3 +3312,7 @@ background-color: #FCB55F;
     transform: translateY(-2px);
     box-shadow: 4px 4px 0 #191923;
 }
+
+#authButton:hover {
+    color: #2a2a2f;
+}

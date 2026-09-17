@@ -67,6 +67,9 @@ function updateAuthForm() {
     const courseField =
         document.getElementById("courseField");
 
+    const email =
+        document.getElementById("email");
+
 
     if (registerMode) {
 
@@ -97,6 +100,8 @@ function updateAuthForm() {
 
         changeAuthMode.textContent =
             "¿No tienes una cuenta? Crear cuenta";
+            
+        email.disabled = false;
     }
 }
 
@@ -249,7 +254,7 @@ authForm.addEventListener("submit", async (event) => {
 // RECUPERAR CONTRASEÑA
 
 const forgotPassword =
-    document.getElementById("forgotPassword");
+document.getElementById("forgotPassword");
 
 forgotPassword.addEventListener("click", async (event) => {
 
@@ -332,6 +337,11 @@ function prepararRecuperacion() {
     const password =
         document.getElementById("password");
 
+    const email =
+    document.getElementById("email");
+
+    emailField.style.display = "none";
+    email.disabled = true;
 
     authTitle.textContent =
         "Cambiar contraseña";
