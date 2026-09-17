@@ -100,7 +100,7 @@ function updateAuthForm() {
 
         changeAuthMode.textContent =
             "¿No tienes una cuenta? Crear cuenta";
-            
+
         email.disabled = false;
     }
 }
@@ -340,8 +340,8 @@ function prepararRecuperacion() {
     const email =
     document.getElementById("email");
 
-    emailField.style.display = "none";
     email.disabled = true;
+    email.required = false;
 
     authTitle.textContent =
         "Cambiar contraseña";
