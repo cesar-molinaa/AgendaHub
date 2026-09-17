@@ -536,14 +536,6 @@ saveEvent.addEventListener("click", async () => {
         return;
     }
 
-    if (asignatura === "") {
-
-        formError.textContent = "Selecciona una asignatura";
-        formError.classList.add("show");
-
-        return;
-    }
-
     if (calendario === "") {
 
         formError.textContent = "Selecciona un calendario";
@@ -581,7 +573,7 @@ saveEvent.addEventListener("click", async () => {
             .from("events")
             .update({
                 title: titulo,
-                subject_id: asignatura,
+                subject_id: asignatura || null,
                 calendar_id: calendario,
                 date: fecha,
                 time: hora || null,
@@ -621,7 +613,7 @@ saveEvent.addEventListener("click", async () => {
             .insert({
                 user_id: user.id,
                 title: titulo,
-                subject_id: asignatura,
+                subject_id: asignatura || null,
                 calendar_id: calendario,
                 date: fecha,
                 time: hora || null,
