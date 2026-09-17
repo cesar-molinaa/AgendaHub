@@ -1,13 +1,30 @@
+let registerMode = false;
+let recoveryMode = false;
 
+
+// COMPROBAR SI ESTAMOS CAMBIANDO LA CONTRASEÑA
+
+if (window.location.hash.includes("type=recovery")) {
+    recoveryMode = true;
+}
+
+
+// COMPROBAR SESIÓN
 
 async function comprobarSesion() {
 
-    if (window.location.hash.includes("type=recovery")) {
+    if (recoveryMode) {
+        prepararRecuperacion();
         return;
     }
 
-    const { data: { session } } =
+    const { data: { session }, error } =
         await supabaseClient.auth.getSession();
+
+    if (error) {
+        console.error("Error comprobando sesión:", error);
+        return;
+    }
 
     if (session) {
         window.location.href = "index.html";
@@ -17,12 +34,10 @@ async function comprobarSesion() {
 comprobarSesion();
 
 
-let registerMode = false;
-
-
 // CAMBIAR ENTRE LOGIN Y REGISTRO
 
-const changeAuthMode = document.getElementById("changeAuthMode");
+const changeAuthMode =
+    document.getElementById("changeAuthMode");
 
 changeAuthMode.addEventListener("click", () => {
 
@@ -37,18 +52,23 @@ changeAuthMode.addEventListener("click", () => {
 
 function updateAuthForm() {
 
-    const authTitle = document.getElementById("authTitle");
-    const authSubtitle = document.getElementById("authSubtitle");
-    const authButton = document.getElementById("authButton");
+    const authTitle =
+        document.getElementById("authTitle");
 
-    const nameField = document.getElementById("nameField");
-    const courseField = document.getElementById("courseField");
+    const authSubtitle =
+        document.getElementById("authSubtitle");
+
+    const authButton =
+        document.getElementById("authButton");
+
+    const nameField =
+        document.getElementById("nameField");
+
+    const courseField =
+        document.getElementById("courseField");
+
 
     if (registerMode) {
-
-        authTitle.textContent = "";
-        authSubtitle.textContent = "";
-
 
         authTitle.textContent = "Crear cuenta";
 
@@ -83,181 +103,267 @@ function updateAuthForm() {
 
 // ENVIAR FORMULARIO
 
-const authForm = document.getElementById("authForm");
+const authForm =
+    document.getElementById("authForm");
 
 authForm.addEventListener("submit", async (event) => {
 
     event.preventDefault();
 
-    const authButton = document.getElementById("authButton");
-    const authError = document.getElementById("authError");
+    const authButton =
+        document.getElementById("authButton");
 
-    authButton.disabled = true;
+    const authError =
+        document.getElementById("authError");
 
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+    const email =
+        document.getElementById("email").value.trim();
 
+    const password =
+        document.getElementById("password").value;
 
     authError.textContent = "";
 
+    authButton.disabled = true;
 
-    // CREAR CUENTA
+
+    // CAMBIAR CONTRASEÑA
+
+    if (recoveryMode) {
+
+        if (!password) {
+
+            authError.textContent =
+                "Introduce una nueva contraseña.";
+
+            authButton.disabled = false;
+
+            return;
+        }
+
+        if (password.length < 6) {
+
+            authError.textContent =
+                "La contraseña debe tener al menos 6 caracteres.";
+
+            authButton.disabled = false;
+
+            return;
+        }
+
+        const { error } =
+            await supabaseClient.auth.updateUser({
+                password: password
+            });
+
+        if (error) {
+
+            console.error(
+                "Error cambiando contraseña:",
+                error
+            );
+
+            authError.textContent =
+                "No se ha podido cambiar la contraseña.";
+
+            authButton.disabled = false;
+
+            return;
+        }
+
+        alert("Contraseña cambiada correctamente.");
+
+        window.location.href = "index.html";
+
+        return;
+    }
+
+
+// CREAR CUENTA
 
     if (registerMode) {
 
-        const name = document.getElementById("name").value;
-        const course = document.getElementById("course").value;
+        const name =
+            document.getElementById("name").value;
 
-        const { data, error } = await supabaseClient.auth.signUp({
-            email: email,
-            password: password,
-            options: {
-                data: {
-                    name: name,
-                    course: course
+        const course =
+            document.getElementById("course").value;
+
+        const { error } =
+            await supabaseClient.auth.signUp({
+
+                email: email,
+
+                password: password,
+
+                options: {
+                    data: {
+                        name: name,
+                        course: course
+                    }
                 }
-            }
-        });
+
+            });
 
         if (error) {
 
-            authError.textContent = error.message;
+            authError.textContent =
+                error.message;
+
             authButton.disabled = false;
 
             return;
-
         }
 
-        authButton.disabled = false;
         window.location.href = "index.html";
-        return;
 
+        return;
     }
 
 
-    // INICIAR SESIÓN
+// INICIAR SESIÓN
 
-    else {
+    const { error } =
+        await supabaseClient.auth.signInWithPassword({
 
-        const { error } = await supabaseClient.auth.signInWithPassword({
             email: email,
+
             password: password
+
         });
-
-        if (error) {
-
-            authError.textContent = error.message;
-            authButton.disabled = false;
-            return;
-
-        }
-
-        window.location.href = "index.html";
-
-    }
-
-});
-
-
-
-
-const forgotPassword = document.getElementById("forgotPassword");
-
-forgotPassword.addEventListener("click", async (e) => {
-
-    e.preventDefault();
-
-    const email = document.getElementById("email").value.trim();
-
-    if (!email) {
-        alert("Escribe primero tu correo electrónico.");
-        return;
-    }
-
-    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-        redirectTo: "https://cesar-molinaa.github.io/AgendaHub/login.html"
-    });
 
     if (error) {
-        console.error("Error recuperando contraseña:", error);
-        alert("No se ha podido enviar el correo de recuperación.");
+
+        authError.textContent =
+            error.message;
+
+        authButton.disabled = false;
+
         return;
     }
 
-    alert("Te hemos enviado un correo para cambiar tu contraseña.");
+    window.location.href = "index.html";
 });
 
-async function comprobarRecuperacion() {
 
-    const { data: { session } } =
-        await supabaseClient.auth.getSession();
+// RECUPERAR CONTRASEÑA
 
-    if (!session) return;
+const forgotPassword =
+    document.getElementById("forgotPassword");
 
-    const hash = window.location.hash;
+forgotPassword.addEventListener("click", async (event) => {
 
-    if (hash.includes("type=recovery")) {
+    event.preventDefault();
 
-        const authTitle = document.getElementById("authTitle");
-        const authSubtitle = document.getElementById("authSubtitle");
-        const authButton = document.getElementById("authButton");
-        const emailField = document.getElementById("emailField");
-        const nameField = document.getElementById("nameField");
-        const courseField = document.getElementById("courseField");
-        const password = document.getElementById("password");
-        const changeAuthMode = document.getElementById("changeAuthMode");
-        const forgotPassword = document.getElementById("forgotPassword");
+    const email =
+        document.getElementById("email").value.trim();
 
-        authTitle.textContent = "Cambiar contraseña";
-        authSubtitle.textContent = "Introduce tu nueva contraseña.";
+    const authError =
+        document.getElementById("authError");
 
-        emailField.style.display = "none";
-        nameField.style.display = "none";
-        courseField.style.display = "none";
 
-        password.value = "";
-        password.placeholder = "Nueva contraseña";
+    if (!email) {
 
-        authButton.textContent = "Cambiar contraseña";
+        authError.textContent =
+            "Escribe primero tu correo electrónico.";
 
-        changeAuthMode.style.display = "none";
-
-        if (forgotPassword) {
-            forgotPassword.style.display = "none";
-        }
-
-        authButton.onclick = async (e) => {
-
-            e.preventDefault();
-
-            const nuevaPassword = password.value;
-
-            if (!nuevaPassword) {
-                alert("Introduce una nueva contraseña.");
-                return;
-            }
-
-            if (nuevaPassword.length < 6) {
-                alert("La contraseña debe tener al menos 6 caracteres.");
-                return;
-            }
-
-            const { error } =
-                await supabaseClient.auth.updateUser({
-                    password: nuevaPassword
-                });
-
-            if (error) {
-                console.error("Error cambiando contraseña:", error);
-                alert("No se ha podido cambiar la contraseña.");
-                return;
-            }
-
-            alert("Contraseña cambiada correctamente.");
-
-            window.location.href = "index.html";
-        };
+        return;
     }
+
+
+    const { error } =
+        await supabaseClient.auth.resetPasswordForEmail(
+            email,
+            {
+                redirectTo:
+                    "https://cesar-molinaa.github.io/AgendaHub/login.html"
+            }
+        );
+
+
+    if (error) {
+
+        console.error(
+            "Error recuperando contraseña:",
+            error
+        );
+
+        authError.textContent =
+            error.message;
+
+        return;
+    }
+
+
+    alert(
+        "Te hemos enviado un correo para cambiar tu contraseña."
+    );
+});
+
+
+// PREPARAR PANTALLA DE RECUPERACIÓN
+
+function prepararRecuperacion() {
+
+    const authTitle =
+        document.getElementById("authTitle");
+
+    const authSubtitle =
+        document.getElementById("authSubtitle");
+
+    const authButton =
+        document.getElementById("authButton");
+
+    const emailField =
+        document.getElementById("emailField");
+
+    const nameField =
+        document.getElementById("nameField");
+
+    const courseField =
+        document.getElementById("courseField");
+
+    const forgotPassword =
+        document.getElementById("forgotPassword");
+
+    const changeAuthMode =
+        document.getElementById("changeAuthMode");
+
+    const password =
+        document.getElementById("password");
+
+
+    authTitle.textContent =
+        "Cambiar contraseña";
+
+    authSubtitle.textContent =
+        "Introduce tu nueva contraseña.";
+
+    emailField.style.display = "none";
+    nameField.style.display = "none";
+    courseField.style.display = "none";
+
+    password.value = "";
+    password.placeholder = "Nueva contraseña";
+
+    authButton.textContent =
+        "Cambiar contraseña";
+
+    forgotPassword.style.display = "none";
+
+    changeAuthMode.style.display = "none";
 }
 
-comprobarRecuperacion();
+
+// DETECTAR RECUPERACIÓN DE SUPABASE
+
+supabaseClient.auth.onAuthStateChange((event) => {
+
+    if (event === "PASSWORD_RECOVERY") {
+
+        recoveryMode = true;
+
+        prepararRecuperacion();
+    }
+
+});
