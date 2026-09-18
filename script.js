@@ -42,6 +42,9 @@ comprobarUsuario();
 const menuBtn = document.getElementById("menuBtn");
 const sidebar = document.getElementById("sidebar");
 
+if (window.innerWidth <= 768) {
+    sidebar.classList.add("hide");
+}
 
 if(menuBtn){
 

@@ -3320,3 +3320,86 @@ background-color: #FCB55F;
     box-shadow: 4px 4px 0 #191923;
 }
 
+
+
+
+
+/*MÓVIL*/
+
+@media (max-width: 768px) {
+
+    header{
+        width: 95%;
+        padding: .5rem 1rem;
+        top: .8rem;
+    }
+
+    #menuBtn, #userIcon{
+        width: 1rem;
+        height: 1rem;
+    }
+
+    #sidebar{
+        min-height: 80vh;
+        height: auto;
+        position: fixed;
+
+        left: .8rem;
+        top: 5rem;
+
+        transform: none;
+        transition: left .2s ease;
+    }
+
+    .sidebar{
+        background-color: #fcb55fe5;
+        padding: 2rem 1rem 1rem 1rem;
+    }
+
+
+    #sidebar.hide{
+        left: -100%;
+        transform: none;
+    }
+
+    .sidebar .item a{
+        font-size: .6rem;
+    }
+
+    .sidebar .item img{
+        width: 1rem;
+        height: 1rem;
+    }
+
+
+
+    .tasks-main{
+        width: auto;
+        margin: 5rem 1rem 2rem 1rem ;
+    }
+
+    .welcome{
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .welcome h2{
+        font-size: 2rem;
+    }
+
+    .welcome1 p{
+        font-size: .7rem;
+    }
+
+    .welcome1 #link-pdf{
+        font-size: .6rem;
+    }
+    .cuenta-atras{
+        width: 80%;
+    }
+
+    .cuenta-atras span{
+        font-size: 1.6rem;
+    }
+}
