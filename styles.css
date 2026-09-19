@@ -3322,7 +3322,14 @@ background-color: #FCB55F;
 
 
 
-
+#calendarsBtn {
+    display: none;
+    background-color: #FCB55F;
+    border: 2px solid #191923;
+    box-shadow: 2px 2px 0 #191923;
+    padding: .3rem .4rem;
+    font-weight: 600;
+}
 
 /*MÓVIL*/
 
@@ -3335,8 +3342,8 @@ background-color: #FCB55F;
     }
 
     #menuBtn, #userIcon{
-        width: 1rem;
-        height: 1rem;
+        width: 1.2rem;
+        height: 1.2rem;
     }
 
     #sidebar{
@@ -3373,9 +3380,15 @@ background-color: #FCB55F;
 
 
 
-    .tasks-main{
+
+    .tasks-main, .seccion-vistas-agenda{
         width: auto;
         margin: 5rem 1rem 2rem 1rem ;
+        padding: .5rem .2rem;
+    }
+
+    .seccion-vistas-agenda{
+        grid-template-columns: none;
     }
 
     .welcome{
@@ -3402,4 +3415,137 @@ background-color: #FCB55F;
     .cuenta-atras span{
         font-size: 1.6rem;
     }
+
+
+    .calendars-panel{
+        display: none;
+    }
+
+    .calendars-panel.show {
+        display: block;
+        padding: .8rem;
+        min-height: fit-content;
+        margin-top: 0;
+    }
+
+    .eventos{
+        margin: 0;
+        gap: 1rem;
+        padding: .5rem 1rem;
+        width: 100%;
+    }
+
+    .eventos .title {
+        position: relative;
+    }
+    
+
+    .eventos .title h2{
+        font-size: 1.2rem;
+    }
+
+    .eventos .title .buttons{
+        gap: .3rem;
+    }
+
+    .buttons #todayBtn, .buttons #viewBtn, .buttons #addEvent, #viewMenu button, .calendar-item{
+        font-size: .6rem;
+        padding: .3rem .6rem;
+        box-shadow: 2px 2px 0 #191923;
+    }
+
+    #calendarsBtn {
+        background-color: #FCB55F;
+        border: 2px solid #191923;
+        box-shadow: 2px 2px 0 #191923;
+        padding: .3rem .4rem;
+        font-size: .6rem;
+    }
+
+    #calendarsBtn {
+        display: block;
+    }
+
+    .calendar{
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .calendar-header{
+        padding: .5rem;
+
+    }
+
+    .calendar-header #currentMonth{
+        font-size: 1.2rem;
+    }
+
+    .calendar-header button{
+        width: 1.2rem;
+        height: 1.2rem;
+        font-size: .7rem;
+    }
+
+    .calendar-weekdays,
+    .calendar-days {
+        width: 100%;
+    }
+
+    .calendar-days{
+        grid-template-rows: repeat(5, 6rem);
+    }
+    .calendar-day {
+        min-width: 0;
+        box-sizing: border-box;
+
+        font-size: .7rem;
+        padding: .4rem;
+        gap: .2rem;
+
+        height: 6rem;
+    }
+
+    .calendar-event {
+        font-size: 0;
+        width: 2rem;
+        height: .8rem;
+        min-height: 8px;
+        padding: 0;
+        margin: 3px auto 0;
+        border: 1px solid #191923;
+        box-shadow: none;
+    }
+
+    .calendar-day.today > span{
+        width: 1.2rem;
+        height: 1.2rem;
+    }
+
+    .calendars-header{
+        margin-bottom: .5rem;
+    }
+    .calendars-header h4{
+        font-size: .8rem;
+    }
+
+    .calendars-header #addCalendar{
+        font-size: 1rem;
+    }
+
+
+
+    .modal {
+        padding: 1rem;
+        box-sizing: border-box;
+    }
+
+    .modal > div {
+        width: 100%;
+        max-width: 100%;
+        max-height: 90vh;
+        box-sizing: border-box;
+        overflow-y: auto;
+    }
+
+
 }

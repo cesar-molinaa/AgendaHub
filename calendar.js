@@ -14,7 +14,34 @@ document.querySelectorAll(".modal").forEach(modal => {
 
 });
 
+const calendarsBtn = document.getElementById("calendarsBtn");
+const calendarsPanel = document.querySelector(".calendars-panel");
 
+calendarsBtn.addEventListener("click", () => {
+
+    const abierto = calendarsPanel.classList.toggle("show");
+
+    if (window.innerWidth <= 768 && abierto) {
+
+        const rect = calendarsBtn.getBoundingClientRect();
+
+        calendarsPanel.style.position = "fixed";
+        calendarsPanel.style.top = `${rect.bottom + 8}px`;
+        calendarsPanel.style.left = `${rect.left + rect.width / 2}px`;
+        calendarsPanel.style.right = "auto";
+        calendarsPanel.style.transform = "translateX(-50%)";
+        calendarsPanel.style.zIndex = "100";
+
+    } else {
+
+        calendarsPanel.style.position = "";
+        calendarsPanel.style.top = "";
+        calendarsPanel.style.left = "";
+        calendarsPanel.style.right = "";
+        calendarsPanel.style.transform = "";
+    }
+
+});
 
 //BOTON AÑADIR EVENTO
 
