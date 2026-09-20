@@ -49,6 +49,10 @@ a:hover{
     color: #FCB55F;
 }
 
+button{
+    color: #191923;
+}
+
 header{
     box-sizing: border-box;
     width: 90%;
@@ -3115,7 +3119,6 @@ cursor: pointer;
 }
 
 #userImg{
-    background-color: red;
     width: 5rem;
     height: 5rem;
 
