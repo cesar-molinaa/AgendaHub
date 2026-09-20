@@ -890,22 +890,15 @@ document.querySelectorAll(".edit-field").forEach(button => {
 
 
 
-function renderSubjectContent() {
+async function renderSubjectContent() {
 
     if (!currentSubject) {
         return;
     }
 
-    // CARGAR LOS DATOS DESDE LOCALSTORAGE
-    const eventos = JSON.parse(localStorage.getItem("eventos")) || [];
-    const tasks = JSON.parse(localStorage.getItem("agendahub-tasks")) || [];
-    const marks = JSON.parse(localStorage.getItem("agendahub-marks")) || [];
-
-
     const subjectEvents = document.getElementById("subjectEvents");
     const subjectTasks = document.getElementById("subjectTasks");
     const subjectMarks = document.getElementById("subjectMarks");
-
 
     // LIMPIAR
 
@@ -914,16 +907,21 @@ function renderSubjectContent() {
     subjectMarks.innerHTML = "";
 
 
-
     // EVENTOS
-    // ----------------------------------------------------------------
 
-    const subjectEventList = eventos
-        .filter(evento => evento.asignatura == currentSubject.id)
-        .sort((a, b) => a.fecha.localeCompare(b.fecha));
+    const { data: events, error: eventsError } = await supabaseClient
+        .from("events")
+        .select("*")
+        .eq("subject_id", currentSubject.id)
+        .order("date", { ascending: true });
+
+    if (eventsError) {
+        console.error("Error cargando eventos de la asignatura:", eventsError);
+        return;
+    }
 
 
-    if (subjectEventList.length === 0) {
+    if (!events || events.length === 0) {
 
         subjectEvents.innerHTML = `
             <p class="empty-subject-content">
@@ -933,7 +931,7 @@ function renderSubjectContent() {
 
     } else {
 
-        subjectEventList.forEach(evento => {
+        events.forEach(evento => {
 
             const eventCard = document.createElement("div");
 
@@ -941,14 +939,13 @@ function renderSubjectContent() {
 
             eventCard.innerHTML = `
                 <div>
-                    <h3>${evento.titulo}</h3>
+                    <h3>${evento.title}</h3>
                 </div>
 
                 <span>
-                    ${evento.fecha.split("-").reverse().join("/")}
+                    ${evento.date.split("-").reverse().join("/")}
                 </span>
             `;
-
 
             subjectEvents.appendChild(eventCard);
 
@@ -957,16 +954,21 @@ function renderSubjectContent() {
     }
 
 
-
     // TAREAS
-    // ----------------------------------------------------------------
 
-    const subjectTasksList = tasks
-        .filter(task => task.subject == currentSubject.id)
-        .sort((a, b) => a.date.localeCompare(b.date));
+    const { data: tasks, error: tasksError } = await supabaseClient
+        .from("tasks")
+        .select("*")
+        .eq("subject_id", currentSubject.id)
+        .order("date", { ascending: true });
+
+    if (tasksError) {
+        console.error("Error cargando tareas de la asignatura:", tasksError);
+        return;
+    }
 
 
-    if (subjectTasksList.length === 0) {
+    if (!tasks || tasks.length === 0) {
 
         subjectTasks.innerHTML = `
             <p class="empty-subject-content">
@@ -976,12 +978,11 @@ function renderSubjectContent() {
 
     } else {
 
-        subjectTasksList.forEach(task => {
+        tasks.forEach(task => {
 
             const taskCard = document.createElement("div");
 
             taskCard.classList.add("subject-task-card");
-
 
             let statusText = "Pendiente";
 
@@ -992,7 +993,6 @@ function renderSubjectContent() {
             if (task.status === "done") {
                 statusText = "Hecho";
             }
-
 
             taskCard.innerHTML = `
                 <div>
@@ -1010,16 +1010,21 @@ function renderSubjectContent() {
     }
 
 
-
     // CALIFICACIONES
-    // ----------------------------------------------------------------
 
-    const subjectMarksList = marks
-        .filter(mark => mark.subject == currentSubject.id)
-        .sort((a, b) => a.date.localeCompare(b.date));
+    const { data: marks, error: marksError } = await supabaseClient
+        .from("marks")
+        .select("*")
+        .eq("subject_id", currentSubject.id)
+        .order("date", { ascending: true });
+
+    if (marksError) {
+        console.error("Error cargando calificaciones de la asignatura:", marksError);
+        return;
+    }
 
 
-    if (subjectMarksList.length === 0) {
+    if (!marks || marks.length === 0) {
 
         subjectMarks.innerHTML = `
             <p class="empty-subject-content">
@@ -1029,7 +1034,7 @@ function renderSubjectContent() {
 
     } else {
 
-        subjectMarksList.forEach(mark => {
+        marks.forEach(mark => {
 
             const markCard = document.createElement("div");
 
@@ -1050,8 +1055,7 @@ function renderSubjectContent() {
 
     }
 
-}
-
+};
 
 
 
