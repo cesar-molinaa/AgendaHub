@@ -49,9 +49,14 @@ a:hover{
     color: #FCB55F;
 }
 
-button{
+
+button, button a {
     color: #191923;
+    -webkit-text-fill-color: #191923;
+    -webkit-appearance: none;
+    appearance: none;
 }
+
 
 header{
     box-sizing: border-box;
