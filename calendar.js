@@ -1043,9 +1043,10 @@ function mostrarSemana() {
         });
 
         day.innerHTML = `
-            <span>
-                ${dia.getDate()}
-            </span>
+            <div class="week-day-header">
+                <strong>${nombreDia}</strong>
+                <span>${dia.getDate()}</span>
+            </div>
         `;
 
 

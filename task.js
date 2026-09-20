@@ -387,7 +387,13 @@ function renderTasks() {
 
             <div class="task-actions">
                 <span class="task-date">${task.date.split("-").reverse().slice(0, 2).join("/")}</span>
-                <button class="task-status-button">▼</button>
+                <button class="task-status-button">
+                    <span class="icon icon-down" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M6 9L12 15L18 9"></path>
+                                </svg>
+                            </span>
+                </button>
             </div>
         `;
         
@@ -435,7 +441,13 @@ function renderTasks() {
 
             <div class="task-actions">
                 <span class="task-date">${task.date.split("-").reverse().slice(0, 2).join("/")}</span>
-                <button class="task-status-button">▼</button>
+                <button class="task-status-button">
+                    <span class="icon icon-down" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M6 9L12 15L18 9"></path>
+                                </svg>
+                            </span>
+                </button>
             </div>
         `;
 
@@ -526,7 +538,13 @@ function renderTomorrowTasks() {
 
             <div class="task-actions">
                 <span class="task-date">${task.date.split("-").reverse().slice(0, 2).join("/")}</span>
-                <button class="task-status-button">▼</button>
+                <button class="task-status-button">
+                    <span class="icon icon-down" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M6 9L12 15L18 9"></path>
+                                </svg>
+                            </span>
+                </button>
             </div>
         `;
 
@@ -594,7 +612,13 @@ function renderPendingTasks() {
 
             <div class="task-actions">
                 <span class="task-date">${task.date.split("-").reverse().slice(0, 2).join("/")}</span>
-                <button class="task-status-button">▼</button>
+                <button class="task-status-button">
+                    <span class="icon icon-down" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M6 9L12 15L18 9"></path>
+                                </svg>
+                            </span>
+                </button>
             </div>
         `;
 

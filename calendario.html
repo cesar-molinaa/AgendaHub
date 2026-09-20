@@ -53,7 +53,11 @@
                     <div class="view-selector">
                         <button id="viewBtn">
                             Mes 
-                            <span>▼</span>
+                            <span class="icon icon-down" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M6 9L12 15L18 9"></path>
+                                </svg>
+                            </span>
                         </button>
 
                         <div class="view-menu" id="viewMenu">
@@ -64,7 +68,7 @@
                     </div>
 
 
-                    <button id="calendarsBtn">Calendars</button>
+                    <button id="calendarsBtn">Calendarios</button>
 
                     <button id="addEvent"> + </button>
                 </div>
@@ -77,11 +81,23 @@
 
                 <div class="calendar-header" id="calendarHeader">
 
-                    <button id="prevMonth">◀</button>
+                    <button id="prevMonth">
+                        <span class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M15 18L9 12L15 6"></path>
+                            </svg>
+                        </span>
+                    </button>
 
                     <h2 id="currentMonth">Septiembre</h2>
 
-                    <button id="nextMonth">▶</button>
+                    <button id="nextMonth">
+                        <span class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M9 18L15 12L9 6"></path>
+                            </svg>
+                        </span>
+                    </button>
                 </div>
 
                 <div class="calendar-weekdays">

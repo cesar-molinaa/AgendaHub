@@ -291,7 +291,16 @@ function openSubject(subject) {
             const link = document.createElement("a");
 
             link.href = subject[field];
-            link.textContent = "Abrir sitio web ↗";
+            link.innerHTML = `
+                Abrir sitio web
+                <span class="icon icon-external" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M14 5H19V10"></path>
+                        <path d="M19 5L10 14"></path>
+                        <path d="M19 13V19H5V5H11"></path>
+                    </svg>
+                </span>
+            `;
             link.target = "_blank";
             link.rel = "noopener noreferrer";
 
@@ -373,7 +382,13 @@ if (editSubjectNameButton) {
         subjectName.replaceWith(newSubjectName);
 
         // CAMBIAR BOTÓN
-        editButton.textContent = "✎";
+        editButton.innerHTML = `
+        <span class="icon icon-pencil" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+                <path d="M4 20H8L19 9L15 5L4 16V20Z"></path>
+                <path d="M13.5 6.5L17.5 10.5"></path>
+            </svg>
+        </span>`;
 
         // ACTUALIZAR TARJETAS
         renderSubjects();
@@ -395,7 +410,12 @@ if (editSubjectNameButton) {
     subjectName.replaceWith(input);
 
     // CAMBIAR BOTÓN
-    editButton.textContent = "✓";
+    editButton.innerHTML = `
+    <span class="icon icon-check" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+            <path d="M5 12L10 17L19 7"></path>
+        </svg>
+    </span>`;
 
     // ENFOCAR INPUT
     input.focus();
@@ -611,7 +631,13 @@ document.querySelectorAll(".edit-field").forEach(button => {
 
                     item.classList.remove("editing");
 
-                    button.textContent = "✎";
+                    button.innerHTML = `
+                    <span class="icon icon-pencil" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M4 20H8L19 9L15 5L4 16V20Z"></path>
+                            <path d="M13.5 6.5L17.5 10.5"></path>
+                        </svg>
+                    </span>`;
 
 
                     // ACTUALIZAR TARJETA
@@ -622,7 +648,13 @@ document.querySelectorAll(".edit-field").forEach(button => {
 
                 item.classList.add("editing");
 
-                button.textContent = "✓";
+                button.innerHTML = `
+                    <span class="icon icon-check" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M5 12L10 17L19 7"></path>
+                        </svg>
+                    </span>
+                `;
 
                 input.focus();
 
@@ -673,7 +705,13 @@ document.querySelectorAll(".edit-field").forEach(button => {
 
             item.classList.add("editing");
 
-            button.textContent = "✓";
+            button.innerHTML = `
+                    <span class="icon icon-check" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M5 12L10 17L19 7"></path>
+                        </svg>
+                    </span>
+                `;
 
             input.focus();
 
@@ -719,7 +757,13 @@ document.querySelectorAll(".edit-field").forEach(button => {
 
                     item.classList.remove("editing");
 
-                    button.textContent = "✎";
+                    button.innerHTML = `
+                    <span class="icon icon-pencil" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M4 20H8L19 9L15 5L4 16V20Z"></path>
+                            <path d="M13.5 6.5L17.5 10.5"></path>
+                        </svg>
+                    </span>`;
 
                     return;
 
@@ -727,7 +771,14 @@ document.querySelectorAll(".edit-field").forEach(button => {
 
 
                 // SUBIR IMAGEN
-                button.textContent = "↑";
+                button.innerHTML = `
+                    <span class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 19V5"></path>
+                            <path d="M6 11L12 5L18 11"></path>
+                        </svg>
+                    </span>
+                `;
 
                 try {
 
@@ -769,7 +820,13 @@ document.querySelectorAll(".edit-field").forEach(button => {
 
                     item.classList.remove("editing");
 
-                    button.textContent = "✎";
+                    button.innerHTML = `
+                    <span class="icon icon-pencil" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M4 20H8L19 9L15 5L4 16V20Z"></path>
+                            <path d="M13.5 6.5L17.5 10.5"></path>
+                        </svg>
+                    </span>`;
 
 
                     // ACTUALIZAR TARJETAS
@@ -781,7 +838,13 @@ document.querySelectorAll(".edit-field").forEach(button => {
 
                     alert("No se ha podido subir la imagen.");
 
-                    button.textContent = "✓";
+                    button.innerHTML = `
+                    <span class="icon icon-check" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M5 12L10 17L19 7"></path>
+                        </svg>
+                    </span>
+                `;
 
                 }
 
@@ -823,7 +886,16 @@ document.querySelectorAll(".edit-field").forEach(button => {
 
                     link.href = currentSubject[field];
 
-                    link.textContent = "Abrir sitio web ↗";
+                    link.innerHTML = `
+                        Abrir sitio web
+                        <span class="icon icon-external" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M14 5H19V10"></path>
+                                <path d="M19 5L10 14"></path>
+                                <path d="M19 13V19H5V5H11"></path>
+                            </svg>
+                        </span>
+                    `;
 
                     link.target = "_blank";
 
@@ -869,7 +941,13 @@ document.querySelectorAll(".edit-field").forEach(button => {
 
                 item.classList.remove("editing");
 
-                button.textContent = "✎";
+                button.innerHTML = `
+                    <span class="icon icon-pencil" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M4 20H8L19 9L15 5L4 16V20Z"></path>
+                            <path d="M13.5 6.5L17.5 10.5"></path>
+                        </svg>
+                    </span>`;
 
 
                 // ACTUALIZAR TARJETAS

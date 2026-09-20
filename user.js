@@ -1,3 +1,15 @@
+document.querySelectorAll(".modal").forEach(modal => {
+
+    modal.addEventListener("click", (event) => {
+
+        if (event.target === modal) {
+            modal.classList.remove("show");
+        }
+
+    });
+
+});
+
 async function cargarPerfil() {
 
     const { data: { user }, error } = await supabaseClient.auth.getUser();
