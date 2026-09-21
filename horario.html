@@ -1,0 +1,289 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgendaHub</title>
+    <link rel="icon" href="imgs/agendahub-icon.png" type="image/x-icon">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <header>
+
+        <div class="main">
+            <img src="imgs/menu.png" id="menuBtn">
+            <h1>AgendaHub</h1>
+        </div>
+
+        <div class="buttons">
+            <img src="imgs/user.png" alt="user" id="userIcon">
+        </div>
+
+
+        
+
+    </header>
+
+    <div class="sidebar" id="sidebar">
+
+        <div class="item"><img src="imgs/casa.png"><a href="index.html">Inicio</a></div>
+        <div class="item"><img src="imgs/calendar.png" alt=""><a href="calendario.html">Calendario</a></div>
+        <div class="item"><img src="imgs/schedule.png" alt=""><a href="horario.html">Horario</a></div>
+        <div class="item"><img src="imgs/task.png" alt=""><a href="task.html">Tareas</a></div>
+        <div class="item"><img src="imgs/bars.png" alt=""><a href="mark.html">Calificaciones</a></div>
+        <div class="item"><img src="imgs/libro.png" alt=""><a href="subjects.html">Asignaturas</a></div>
+    </div>
+
+
+    <main class="horario-main">
+
+        <section class="horario-section">
+
+            <div class="horario-header">
+
+                <div>
+                    <h1>Mi horario</h1>
+                    <p id="weekRange"></p>
+                </div>
+
+                <div class="horario-actions">
+
+                    <button id="previousWeek">
+                        ‹
+                    </button>
+
+                    <button id="today">
+                        Hoy
+                    </button>
+
+                    <button id="nextWeek">
+                        ›
+                    </button>
+
+                    <button id="addScheduleEvent">
+                        + Añadir
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="schedule-container">
+
+                <div id="scheduleGrid">
+
+                    <!-- Lo generará JavaScript -->
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- MODAL CREAR EVENTO -->
+
+    <div id="scheduleModal" class="modal">
+
+        <div class="schedule-form">
+
+            <h2 id="scheduleModalTitle">Nuevo evento</h2>
+
+            <div class="form-group">
+
+                <label for="scheduleTitle">
+                    Título
+                </label>
+
+                <input
+                    type="text"
+                    id="scheduleTitle"
+                    placeholder="Título"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="scheduleDay">
+                    Día
+                </label>
+
+                <select id="scheduleDay">
+
+                    <option value="0">Lunes</option>
+                    <option value="1">Martes</option>
+                    <option value="2">Miércoles</option>
+                    <option value="3">Jueves</option>
+                    <option value="4">Viernes</option>
+                    <option value="5">Sábado</option>
+                    <option value="6">Domingo</option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-row">
+
+                <div class="form-group">
+
+                    <label for="scheduleStart">
+                        Hora de inicio
+                    </label>
+
+                    <input
+                        type="time"
+                        id="scheduleStart"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="scheduleEnd">
+                        Hora de finalización
+                    </label>
+
+                    <input
+                        type="time"
+                        id="scheduleEnd"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="scheduleColor">
+                    Color
+                </label>
+
+                <input
+                    type="color"
+                    id="scheduleColor"
+                    value="#60A561"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="scheduleDescription">
+                    Descripción
+                </label>
+
+                <textarea
+                    id="scheduleDescription"
+                    placeholder="Descripción opcional"
+                ></textarea>
+
+            </div>
+
+
+            <div class="form-group schedule-repeat">
+
+                <label>
+
+                    <input
+                        type="checkbox"
+                        id="scheduleRepeat"
+                        checked
+                    >
+
+                    Repetir todas las semanas
+
+                </label>
+
+            </div>
+
+
+            <p id="scheduleFormError"></p>
+
+
+            <div class="modal-buttons">
+
+                <button id="cancelSchedule">
+                    Cancelar
+                </button>
+
+                <button id="saveSchedule">
+                    Crear evento
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- MODAL INFORMACIÓN DEL EVENTO -->
+
+    <div id="scheduleInfoModal" class="modal">
+
+        <div class="schedule-form">
+
+            <h2 id="scheduleInfoTitle"></h2>
+
+            <div class="schedule-info">
+
+                <p>
+                    <strong>Día:</strong>
+                    <span id="scheduleInfoDay"></span>
+                </p>
+
+                <p>
+                    <strong>Horario:</strong>
+                    <span id="scheduleInfoTime"></span>
+                </p>
+
+                <p>
+                    <strong>Descripción:</strong>
+                    <span id="scheduleInfoDescription"></span>
+                </p>
+
+            </div>
+
+            <div class="modal-buttons">
+
+                <button id="closeScheduleInfo">
+                    Cerrar
+                </button>
+
+                <button id="editSchedule">
+                    Editar
+                </button>
+
+                <button id="deleteSchedule">
+                    Eliminar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+
+    <script src="horario.js"></script>
+    <script src="script.js"></script>
+
+</body>
+
+</html>

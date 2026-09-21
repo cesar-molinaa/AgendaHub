@@ -64,7 +64,7 @@ header{
     position: fixed;
     z-index: 1000;
     height: auto;
-    padding: 1rem 2rem;
+    padding: .8rem 2rem;
 
     top: 1rem;
     left: 50%;
@@ -3400,6 +3400,367 @@ background-color: #FCB55F;
     stroke-linecap: round;
     stroke-linejoin: round;
 }
+
+
+
+
+
+
+
+
+
+
+
+/* =========================
+   HORARIO
+========================= */
+
+
+.horario-section {
+    margin: 7rem 2rem 2rem 16rem;
+
+    background: #F7F3E3;
+    border: 2px solid #191923;
+    box-shadow: 5px 5px 0 #191923;
+    padding: 1rem;
+}
+
+
+/* CABECERA */
+
+.horario-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.horario-header h1 {
+    margin: 0;
+}
+
+.horario-header p {
+    margin: 5px 0 0;
+}
+
+
+.horario-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.horario-actions button {
+    background: #FCB55F;
+    border: 2px solid #191923;
+    box-shadow: 5px 5px 0 #191923;
+    padding: 10px 15px;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+
+    transition: .2s ease;
+}
+
+.horario-actions button:hover{
+    transform: translateY(-4px);
+    box-shadow: 7px 7px 0 #191923;
+
+}
+
+/* CONTENEDOR */
+
+.schedule-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+
+/* GRID */
+
+#scheduleGrid {
+    min-width: 850px;
+}
+
+
+/* CABECERA DE DÍAS */
+
+.schedule-header {
+    display: grid;
+    grid-template-columns: 3rem repeat(7, 1fr);
+    border-top: 2px solid #191923;
+    border-left: 2px solid #191923;
+}
+
+.schedule-time-header,
+.schedule-day-header {
+    width: auto;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 2px solid #191923;
+    border-bottom: 2px solid #191923;
+}
+
+.schedule-day-header {
+    font-weight: 700;
+    background: #FCB55F;
+}
+
+
+/* CUERPO */
+
+.schedule-body {
+    display: grid;
+    grid-template-columns: 3rem repeat(7, 1fr);
+    border-left: 2px solid #191923;
+}
+
+
+/* HORAS */
+
+.schedule-time {
+    height: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 8px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    border-right: 2px solid #191923;
+    border-bottom: 2px solid #191923;
+}
+
+
+/* CELDAS */
+
+.schedule-cell {
+    position: relative;
+    height: 2rem;
+    overflow: visible;
+
+    border-right: 2px solid #191923;
+    border-bottom: 2px solid #191923;
+
+    background: #F7F3E3;
+}
+
+
+
+/* =========================
+   MODAL HORARIO
+========================= */
+
+.schedule-form {
+    width: min(50%, 650px);
+    min-width: 400px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    padding: 2rem;
+
+    background-color: #fff;
+
+    border: 2px solid #191923;
+    box-shadow: 8px 8px 0 #191923;
+}
+
+.schedule-form h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #191923;
+}
+
+.schedule-form input,
+.schedule-form textarea,
+.schedule-form select {
+    padding: .5rem 1rem;
+
+    font-family: "Montserrat", sans-serif;
+    font-size: .8rem;
+
+    border: 2px solid #191923;
+    border-radius: 12px;
+
+    background-color: #F7F3E3;
+
+    width: 100%;
+    min-height: 2.5rem;
+
+    transition: .2s ease;
+}
+
+.schedule-form input:focus,
+.schedule-form textarea:focus,
+.schedule-form select:focus {
+    outline: none;
+    box-shadow: 5px 5px 0 #FCB55F;
+}
+
+.schedule-form textarea {
+    min-height: 5rem;
+    resize: none;
+}
+
+.schedule-form .form-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.schedule-form .form-row .form-group {
+    flex: 1;
+}
+
+.schedule-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+}
+
+.schedule-form .form-group label {
+    font-size: .8rem;
+    font-weight: 600;
+}
+
+.schedule-form .schedule-repeat {
+    display: flex;
+    align-items: center;
+}
+
+.schedule-form .schedule-repeat label {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    cursor: pointer;
+}
+
+.schedule-form .schedule-repeat input[type="checkbox"] {
+    width: 1.1rem;
+    min-height: 1.1rem;
+    padding: 0;
+
+    appearance: none;
+
+    background-color: #fff;
+    border: 2px solid #191923;
+    border-radius: 0;
+
+    cursor: pointer;
+}
+
+.schedule-form .schedule-repeat input[type="checkbox"]:checked {
+    background-color: #FCB55F;
+}
+
+.schedule-form .schedule-repeat input[type="checkbox"]:checked::after {
+    content: "✓";
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 100%;
+
+    color: #191923;
+    font-size: .7rem;
+    font-weight: 800;
+}
+
+.schedule-form .modal-buttons {
+    display: flex;
+    justify-content: flex-start;
+    gap: 1rem;
+
+    margin-top: .5rem;
+}
+
+.schedule-form .modal-buttons button {
+    background-color: #FCB55F;
+
+    padding: .5rem 1rem;
+
+    border: 2px solid #191923;
+    box-shadow: 5px 5px 0 #191923;
+
+    font-family: "Montserrat", sans-serif;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: .2s ease;
+}
+
+.schedule-form .modal-buttons button:hover {
+    transform: translateY(-4px);
+    box-shadow: 7px 7px 0 #191923;
+}
+
+#scheduleColor {
+    width: 4rem;
+    height: 2.5rem;
+
+    padding: .2rem;
+
+    cursor: pointer;
+}
+
+
+
+.schedule-event {
+    position: absolute;
+
+    left: .2rem;
+    right: .2rem;
+
+    padding: 8px;
+
+    border: 2px solid #191923;
+
+    font-weight: 600;
+    font-size: .8rem;
+
+    overflow: hidden;
+
+    box-sizing: border-box;
+
+    z-index: 10;
+
+    border-top: none;
+}
+
+
+
+
+.schedule-form .schedule-info{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+
+
+
+.today-header {
+    background-color: #fdc989 !important;
+    color: #191923;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
