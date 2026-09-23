@@ -171,15 +171,10 @@ header .main h1{
 }
 
 
-
-
 #sidebar.hide{
     transform: translate(-150%, -60%);
     box-shadow: 5px 5px 0 #191923;
 }
-
-
-
 
 
 
@@ -194,13 +189,14 @@ header .main h1{
 
 
 
+/* ==============================
+   MODALES
+   ============================== */
 
+.modal {
+    position: fixed;
+    inset: 0;
 
-
-
-
-
-.modal{
     width: 100%;
     height: 100%;
 
@@ -208,16 +204,395 @@ header .main h1{
     align-items: center;
     justify-content: center;
 
-    position: fixed;
-    inset: 0;
-    z-index: 2000;
-    
+    padding: 1rem;
+    box-sizing: border-box;
 
+    background-color: rgba(25, 25, 35, 0.45);
+
+    z-index: 2000;
+
+    overflow-y: auto;
 }
 
 .modal.show {
     display: flex;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==============================
+   FORMULARIOS DE MODAL------------------------------------------------------------
+   ============================== */
+
+.event-form,
+.calendar-form,
+.task-form,
+.schedule-form,
+.subject-form {
+    width: min(90%, 650px);
+    max-height: 90vh;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    padding: 2rem;
+
+    box-sizing: border-box;
+
+    background-color: #fff;
+
+    border: 2px solid #191923;
+    box-shadow: 8px 8px 0 #191923;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+
+
+.event-form h2,
+.calendar-form h2,
+.task-form h2,
+.schedule-form h2,
+.subject-form h2 {
+    margin: 0;
+
+    font-size: 1.5rem;
+    font-weight: 700;
+
+    color: #191923;
+}
+
+.event-form .form-group,
+.calendar-form .form-group,
+.task-form .form-group,
+.schedule-form .form-group,
+.subject-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.event-form .form-group label,
+.calendar-form .form-group label,
+.task-form .form-group label,
+.schedule-form .form-group label,
+.subject-form .form-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #191923;
+}
+
+
+.event-form input,
+.event-form select,
+.event-form textarea,
+
+.calendar-form input,
+.calendar-form select,
+.calendar-form textarea,
+
+.task-form input,
+.task-form select,
+.task-form textarea,
+
+.schedule-form input,
+.schedule-form select,
+.schedule-form textarea,
+
+.subject-form input,
+.subject-form select,
+.subject-form textarea {
+    width: 100%;
+    min-height: 2.5rem;
+
+    padding: 0.5rem 1rem;
+
+    box-sizing: border-box;
+
+    font-family: Montserrat, sans-serif;
+    font-size: 0.8rem;
+
+    color: #191923;
+
+    background-color: #F7F3E3;
+
+    border: 2px solid #191923;
+    border-radius: 12px;
+
+    outline: none;
+
+    transition: 0.2s ease;
+}
+
+
+.event-form textarea,
+.calendar-form textarea,
+.task-form textarea,
+.schedule-form textarea,
+.subject-form textarea {
+    min-height: 5rem;
+    resize: none;
+}
+
+
+.event-form input:focus,
+.event-form select:focus,
+.event-form textarea:focus,
+
+.calendar-form input:focus,
+.calendar-form select:focus,
+.calendar-form textarea:focus,
+
+.task-form input:focus,
+.task-form select:focus,
+.task-form textarea:focus,
+
+.schedule-form input:focus,
+.schedule-form select:focus,
+.schedule-form textarea:focus,
+
+.subject-form input:focus,
+.subject-form select:focus,
+.subject-form textarea:focus {
+    outline: none;
+
+    border-color: #191923;
+
+    box-shadow: 5px 5px 0 #FCB55F;
+
+    background-color: #F7F3E3;
+}
+
+
+
+
+/* ==============================
+   BOTONES DE FORMULARIOS
+   ============================== */
+
+.form-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    gap: 1rem;
+
+    margin-top: 0.5rem;
+}
+
+.form-buttons button {
+    padding: 0.5rem 1rem;
+
+    font-family: Montserrat, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+
+    color: #191923;
+
+    background-color: #FCB55F;
+
+    border: 2px solid #191923;
+    box-shadow: 5px 5px 0 #191923;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.form-buttons button:hover {
+    transform: translateY(-4px);
+    box-shadow: 7px 7px 0 #191923;
+}
+
+
+
+
+
+
+
+
+/* ==============================
+   FORMULARIO DE EVENTOS--------------------------------------------
+   ============================== */
+
+.event-basic-info,
+.event-dates,
+.event-times {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-section h3 {
+    margin: 0;
+    padding-bottom: 0.5rem;
+
+    font-size: 0.9rem;
+    font-weight: 700;
+
+    color: #191923;
+
+    border-bottom: 2px solid #191923;
+}
+
+.advanced-options {
+    border: 2px solid #191923;
+    background-color: #F7F3E3;
+}
+
+.advanced-options-button {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0.75rem 1rem;
+
+    font-family: Montserrat, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+
+    color: #191923;
+
+    background: transparent;
+
+    border: none;
+    box-shadow: none;
+
+    cursor: pointer;
+}
+
+.advanced-options-button:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.advanced-arrow {
+    font-size: 1.1rem;
+    transition: transform 0.2s ease;
+}
+
+.advanced-options-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    padding: 1rem;
+
+    border-top: 2px solid #191923;
+}
+
+.checkbox-label {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center;
+
+    gap: 0.5rem;
+
+    font-size: 0.8rem;
+    font-weight: 500;
+
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 1.1rem;
+    min-width: 1.1rem;
+    height: 1.1rem;
+    min-height: 1.1rem;
+
+    margin: 0;
+    padding: 0;
+
+    flex-shrink: 0;
+
+    appearance: none;
+
+    background-color: #fff;
+
+    border: 2px solid #191923;
+    border-radius: 0;
+
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"]:checked {
+    background-color: #60A561;
+    box-shadow: inset 0 0 0 3px #fff;
+}
+
+.repeat-days {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+
+.repeat-days label {
+    display: flex;
+    align-items: center;
+
+    gap: 0.5rem;
+
+    font-size: 0.75rem;
+    font-weight: 500;
+
+    cursor: pointer;
+}
+
+.repeat-days input[type="checkbox"] {
+    width: 1rem;
+    min-width: 1rem;
+    height: 1rem;
+    min-height: 1rem;
+
+    margin: 0;
+    padding: 0;
+
+    appearance: none;
+
+    background-color: #fff;
+
+    border: 2px solid #191923;
+    border-radius: 0;
+
+    cursor: pointer;
+}
+
+.repeat-days input[type="checkbox"]:checked {
+    background-color: #60A561;
+    box-shadow: inset 0 0 0 2px #fff;
+}
+
+.event-repeat-options p {
+    margin: 0 0 0.5rem;
+
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+
+/*CALENDARIO*/-------------------------------------------------
 
 
 
@@ -329,8 +704,6 @@ header .main h1{
 }
 
 
-
-
 .calendar-item input[type="checkbox"]{
     appearance: none;
 
@@ -405,7 +778,6 @@ header .main h1{
 }
 
 
-
 #calendarList{
     display: flex;
     flex-direction: column;
@@ -414,8 +786,6 @@ header .main h1{
 
     width: 100%;
 }
-
-
 
 
 
@@ -449,6 +819,8 @@ header .main h1{
     color: #191923;
 }
 
+
+
 #addEvent{
     background-color: #FCB55F;
     padding: .5rem 1rem;
@@ -468,76 +840,8 @@ header .main h1{
 
 
 
-.event-form{
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    gap: 1rem;
 
-    width: min(50%, 650px);
 
-    min-width: 500px;
-    min-height: 320px;
-
-    padding: 2rem;
-
-    background-color: #fff;
-    border: 2px solid #191923;
-    box-shadow: 8px 8px 0 #191923;
-
-}
-
-.event-form input, .event-form textarea, .event-form select{
-    padding: .5rem 1rem;
-    font-size: .8rem;
-    border: 2px solid #191923;
-    border-radius: 12px;
-    background-color: #F7F3E3;
-
-    width: 100%;
-    min-height: 2.5rem;
-
-    transition: .2s ease;
-}
-
-.event-form textarea {
-    min-height: 5rem;
-    max-height: 12rem;
-    resize: none;
-}
-
-.event-form input:focus,
-.event-form select:focus,
-.event-form textarea:focus {
-    outline: none;
-    border: 2px solid #191923;
-    box-shadow: 5px 5px 0 #FCB55F;
-    background-color: #F7F3E3;
-}
-
-.form-buttons{
-    display: flex;
-    justify-content:flex-start;
-    gap: 2rem;
-    align-items: center;
-}
-
-.form-buttons button{
-    background-color: #FCB55F;
-    padding: .5rem 1rem;
-    box-shadow: 5px 5px 0 #191923;
-    font-weight: 600;
-    cursor: pointer;
-
-    border: 2px solid #191923;
-
-    transition: .2s ease;
-}
-
-.form-buttons button:hover{
-    transform: translateY(-4px);
-    box-shadow: 7px 7px 0 #191923;
-}
 
 .form-error{
 
@@ -653,6 +957,25 @@ header .main h1{
 
 
 
+
+
+
+
+.seccion-vistas-agenda{
+    width: calc(100% - 4rem);
+    height: 90%;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 200px;
+
+    align-items: start;
+
+    gap: 2rem;
+
+    margin: 0 auto;
+
+    padding-left: 200px;
+}
 
 
 
@@ -1053,26 +1376,7 @@ header .main h1{
    MODAL CREAR CALENDARIO
 ========================= */
 
-.calendar-form {
-    width: 40%;
-    min-width: 400px;
 
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-
-    padding: 2rem;
-
-    background-color: #fff;
-
-    border: 2px solid #191923;
-    box-shadow: 8px 8px 0 #191923;
-}
-
-.calendar-form h2 {
-    font-size: 1.5rem;
-    color: #191923;
-}
 
 .calendar-form > p:not(.form-error) {
     font-size: .8rem;
@@ -1081,29 +1385,7 @@ header .main h1{
     line-height: 1.5;
 }
 
-.calendar-form input {
-    width: 100%;
 
-    padding: .7rem 1rem;
-
-    font-family: "Montserrat", sans-serif;
-    font-size: .8rem;
-    font-weight: 500;
-
-    color: #191923;
-    background-color: #F7F3E3;
-
-    border: 2px solid #191923;
-    border-radius: 12px;
-
-    outline: none;
-
-    transition: .2s ease;
-}
-
-.calendar-form input:focus {
-    box-shadow: 5px 5px 0 #FCB55F;
-}
 
 .calendar-form input::placeholder {
     color: #191923;
@@ -1120,12 +1402,6 @@ header .main h1{
 }
 
 
-.event-form input,
-.event-form textarea,
-.event-form select,
-.calendar-form input {
-    font-family: "Montserrat", sans-serif;
-}
 
 
 
@@ -1340,71 +1616,6 @@ header .main h1{
 
 
 
-.modal {
-    position: fixed;
-    inset: 0;
-
-    display: none;
-    align-items: center;
-    justify-content: center;
-
-    background-color: rgba(25, 25, 35, 0.45);
-
-    z-index: 1000;
-}
-
-.modal.show {
-    display: flex;
-}
-
-.task-form{
-    width: min(50%, 650px);
-    min-width: 400px;
-
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-
-    padding: 2rem;
-
-    background-color: #fff;
-
-    border: 2px solid #191923;
-    box-shadow: 8px 8px 0 #191923;
-}
-
-
-
-
-
-.task-form input,
-.task-form textarea,
-.task-form select {
-    padding: .5rem 1rem;
-
-    font-family: "Montserrat", sans-serif;
-    font-size: .8rem;
-
-    border: 2px solid #191923;
-    border-radius: 12px;
-
-    background-color: #F7F3E3;
-
-    width: 100%;
-    min-height: 2.5rem;
-}
-
-.task-form textarea {
-    min-height: 5rem;
-    resize: none;
-}
-
-.task-form input:focus,
-.task-form select:focus,
-.task-form textarea:focus {
-    outline: none;
-    box-shadow: 5px 5px 0 #FCB55F;
-}
 
 
 
@@ -1814,11 +2025,6 @@ cursor: pointer;
 }
 
 
-.subject-form h2 {
-    margin: 0 0 .5rem;
-
-    font-size: 1.5rem;
-}
 
 
 .subject-form input[type="text"] {
@@ -1879,36 +2085,6 @@ cursor: pointer;
 }
 
 
-.subject-form .form-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-
-    margin-top: .5rem;
-}
-
-
-.subject-form .form-buttons button {
-    padding: .6rem 1rem;
-
-    background-color: #FCB55F;
-
-    border: 2px solid #191923;
-    box-shadow: 4px 4px 0 #191923;
-
-    font-family: "Montserrat", sans-serif;
-    font-weight: 700;
-
-    cursor: pointer;
-
-    transition: .2s ease;
-}
-
-
-.subject-form .form-buttons button:hover {
-    transform: translateY(-3px);
-    box-shadow: 6px 6px 0 #191923;
-}
 
 
 .subject-page{
@@ -3553,52 +3729,10 @@ background-color: #FCB55F;
    MODAL HORARIO
 ========================= */
 
-.schedule-form {
-    width: min(50%, 650px);
-    min-width: 400px;
 
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
 
-    padding: 2rem;
-
-    background-color: #fff;
-
-    border: 2px solid #191923;
-    box-shadow: 8px 8px 0 #191923;
-}
-
-.schedule-form h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    color: #191923;
-}
-
-.schedule-form input,
-.schedule-form textarea,
-.schedule-form select {
-    padding: .5rem 1rem;
-
-    font-family: "Montserrat", sans-serif;
-    font-size: .8rem;
-
-    border: 2px solid #191923;
-    border-radius: 12px;
-
-    background-color: #F7F3E3;
-
-    width: 100%;
-    min-height: 2.5rem;
-
-    transition: .2s ease;
-}
-
-.schedule-form input:focus,
-.schedule-form textarea:focus,
-.schedule-form select:focus {
-    outline: none;
-    box-shadow: 5px 5px 0 #FCB55F;
+.schedule-form .schedule-days input:focus{
+    box-shadow: none;
 }
 
 .schedule-form textarea {
@@ -3615,28 +3749,7 @@ background-color: #FCB55F;
     flex: 1;
 }
 
-.schedule-form .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: .4rem;
-}
 
-.schedule-form .form-group label {
-    font-size: .8rem;
-    font-weight: 600;
-}
-
-.schedule-form .schedule-repeat {
-    display: flex;
-    align-items: center;
-}
-
-.schedule-form .schedule-repeat label {
-    display: flex;
-    align-items: center;
-    gap: .6rem;
-    cursor: pointer;
-}
 
 .schedule-form .schedule-repeat input[type="checkbox"] {
     width: 1.1rem;
@@ -3645,16 +3758,12 @@ background-color: #FCB55F;
 
     appearance: none;
 
-    background-color: #fff;
     border: 2px solid #191923;
     border-radius: 0;
 
     cursor: pointer;
 }
 
-.schedule-form .schedule-repeat input[type="checkbox"]:checked {
-    background-color: #FCB55F;
-}
 
 .schedule-form .schedule-repeat input[type="checkbox"]:checked::after {
     content: "✓";
@@ -3712,16 +3821,17 @@ background-color: #FCB55F;
 
 .schedule-event {
     position: absolute;
-
-    left: .2rem;
-    right: .2rem;
+    width: 100%;
 
     padding: 8px;
+    margin: 0;
 
-    border: 2px solid #191923;
+
+    border-bottom: 2px solid #191923;
 
     font-weight: 600;
     font-size: .8rem;
+    line-height: 1.2;
 
     overflow: hidden;
 
@@ -3729,10 +3839,13 @@ background-color: #FCB55F;
 
     z-index: 10;
 
-    border-top: none;
+    transition: .2s ease;
+
 }
 
-
+.schedule-event:hover{
+    filter: brightness(85%);
+}
 
 
 .schedule-form .schedule-info{
@@ -3746,7 +3859,7 @@ background-color: #FCB55F;
 
 
 .today-header {
-    background-color: #fdc989 !important;
+    background-color: #eaa34c !important;
     color: #191923;
 }
 
@@ -3754,21 +3867,75 @@ background-color: #FCB55F;
 
 
 
+/* ============================= */
+/* DÍAS DEL FORMULARIO */
+/* ============================= */
+
+.schedule-days {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+}
+
+/* Cada día: checkbox y texto en la misma línea */
+
+.schedule-days label {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: .5rem;
+    width: 100%;
+    margin: 0;
+    text-align: left;
+}
+
+/* Evita que el checkbox herede estilos extraños */
+
+.schedule-days input[type="checkbox"] {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: #60A561;
+}
+
+/* El texto queda alineado a la izquierda */
+
+.schedule-days span {
+    text-align: left;
+}
 
 
 
+#scheduleRepeat{
+    width: 1rem;
+    height: 1rem;
+}
 
 
+#scheduleRepeat:checked::after{
+
+    width: 1rem;
+    height: 1rem;
+
+    content: "✓";
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
 
+    color: #191923;
+    background-color: #60A561;
+    font-size: .7rem;
+    font-weight: 800;
+}
 
+#scheduleRepeat:focus{
+    box-shadow: none;
 
-
-
-
-
-
-
+}
 
 
 
@@ -4226,39 +4393,7 @@ background-color: #FCB55F;
         overflow-y: auto;
     }
 
-    /* FORMULARIOS */
 
-    .task-form,
-    .subject-form,
-    .event-form {
-        width: calc(100% - 2rem);
-        min-width: 0;
-        max-width: 100%;
-        max-height: 90vh;
-
-        box-sizing: border-box;
-        padding: 1.2rem;
-
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-
-    /* CAMPOS DE LOS FORMULARIOS */
-
-    .task-form input,
-    .task-form textarea,
-    .task-form select,
-    .subject-form input,
-    .subject-form textarea,
-    .subject-form select,
-    .event-form input,
-    .event-form textarea,
-    .event-form select {
-        width: 100%;
-        min-width: 0;
-        max-width: 100%;
-        box-sizing: border-box;
-    }
 
     /* MODAL INFORMACIÓN DE TAREA */
 
@@ -4312,14 +4447,6 @@ background-color: #FCB55F;
         padding: 1.2rem;
     }
 
-    .subject-form input,
-    .subject-form select,
-    .subject-form textarea {
-        width: 100%;
-        max-width: 100%;
-        min-width: 0;
-        box-sizing: border-box;
-    }
 
 
     /* MODALES DE INFORMACIÓN */

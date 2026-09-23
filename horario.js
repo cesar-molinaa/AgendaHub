@@ -28,31 +28,131 @@ const startHour = 0;
 const endHour = 24;
 let scheduleEvents = [];
 let currentWeekOffset = 0;
+let editingScheduleEvent = null;
+
+
+
+const scheduleCalendar =
+    document.getElementById("scheduleCalendar");
+
+
+async function loadScheduleCalendars() {
+
+    const { data, error } = await supabaseClient
+        .from("calendars")
+        .select("*")
+        .order("created_at", { ascending: true });
+
+    if (error) {
+        console.error("Error cargando calendarios:", error);
+        return;
+    }
+
+    scheduleCalendar.innerHTML = `
+        <option value="">Selecciona un calendario</option>
+    `;
+
+    (data || []).forEach(calendario => {
+
+        const option = document.createElement("option");
+
+        option.value = calendario.id;
+        option.textContent = calendario.name;
+
+        scheduleCalendar.appendChild(option);
+
+    });
+}
+
+
+async function loadScheduleSubjects() {
+
+    const { data, error } = await supabaseClient
+        .from("subjects")
+        .select("*")
+        .order("created_at", { ascending: true });
+
+    if (error) {
+        console.error("Error cargando asignaturas:", error);
+        return;
+    }
+
+    const scheduleSubject =
+        document.getElementById("scheduleSubject");
+
+    scheduleSubject.innerHTML = `
+        <option value="">Sin asignatura</option>
+    `;
+
+    (data || []).forEach(asignatura => {
+
+        const option = document.createElement("option");
+
+        option.value = asignatura.id;
+        option.textContent = asignatura.name;
+
+        scheduleSubject.appendChild(option);
+
+    });
+}
+
+const scheduleSubject =
+    document.getElementById("scheduleSubject");
+
+const scheduleColor =
+    document.getElementById("scheduleColor");
+
+scheduleSubject.addEventListener("change", async () => {
+
+    const subjectId = scheduleSubject.value;
+
+    if (!subjectId) {
+        return;
+    }
+
+    const { data, error } = await supabaseClient
+        .from("subjects")
+        .select("color")
+        .eq("id", subjectId)
+        .single();
+
+    if (error) {
+        console.error("Error obteniendo el color de la asignatura:", error);
+        return;
+    }
+
+    if (data && data.color) {
+        scheduleColor.value = data.color;
+    }
+});
+
+
+
+
+
 
 
 
 async function loadScheduleEvents() {
 
     const { data, error } = await supabaseClient
-        .from("schedule")
+        .from("events")
         .select("*")
         .order("start_time", { ascending: true });
 
-
     if (error) {
 
-        console.error("Error cargando el horario:", error);
+        console.error("Error cargando los eventos:", error);
 
         return;
-
     }
-
 
     scheduleEvents = data || [];
 
     renderScheduleEvents();
-
 }
+
+
 function parseTime(time) {
 
     const [hour, minute] = time.split(":").map(Number);
@@ -67,80 +167,232 @@ function parseTime(time) {
 
 function renderScheduleEvents() {
 
-    document.querySelectorAll(".schedule-event").forEach(event => {
-        event.remove();
+    document.querySelectorAll(".schedule-event").forEach(eventElement => {
+        eventElement.remove();
     });
 
 
     scheduleEvents.forEach(event => {
 
-        if (!event.repeat) {
+        /*
+        EVENTOS REPETITIVOS
+        */
 
-            const currentMonday =
-                getMonday(currentWeekOffset);
+        if (event.repeat) {
 
-            const currentWeekStart =
-                `${currentMonday.getFullYear()}-${String(currentMonday.getMonth() + 1).padStart(2, "0")}-${String(currentMonday.getDate()).padStart(2, "0")}`;
+            const repeatDays = event.repeat_days || [];
 
-            if (event.week_start !== currentWeekStart) {
-                return;
-            }
+            repeatDays.forEach(day => {
 
+                renderEventInSchedule(event, day);
+
+            });
+
+            return;
         }
 
 
-        const start = parseTime(event.start_time);
-        const end = parseTime(event.end_time);
+        /*
+        EVENTOS NO REPETITIVOS
+        */
+
+        const eventDate = new Date(event.start_date + "T00:00:00");
+
+        const monday = getMonday(currentWeekOffset);
+
+        const sunday = new Date(monday);
+
+        sunday.setDate(sunday.getDate() + 6);
 
 
-        const cell = document.querySelector(`.schedule-cell[data-day="${event.day}"][data-hour="${start.hour}"]`);
-
-        if(!cell) return;
-
-
-        const eventElement = document.createElement("div");
-
-        eventElement.classList.add("schedule-event");
-
-        eventElement.textContent = event.title;
-
-        eventElement.style.backgroundColor = event.color;
-
-        eventElement.addEventListener("click", (e) => {
-
-            e.stopPropagation();
-            openScheduleInfo(event);
-
-        });
+        if (eventDate < monday || eventDate > sunday) {
+            return;
+        }
 
 
+        const jsDay = eventDate.getDay();
 
-        const startTotal =
-            start.hour * 60 + start.minute;
+        const dayIndex = (jsDay + 6) % 7;
 
-        const endTotal =
-            end.hour * 60 + end.minute;
+        renderEventInSchedule(event, dayIndex);
 
-
-        const duration =
-            endTotal - startTotal;
-
-        const cellHeight = cell.offsetHeight;
-
-        eventElement.style.top =
-            `${(start.minute / 60) * cellHeight}px`;
-
-
-        eventElement.style.height =
-            `${(duration / 60) * cellHeight}px`;
-
-
-        cell.appendChild(eventElement);
-
-    })
+    });
 }
 
 
+function renderEventInSchedule(event, dayIndex) {
+
+    if (!event.start_time || !event.end_time) return;
+
+    const start = parseTime(event.start_time);
+    const end = parseTime(event.end_time);
+
+    const startMinutes =
+        start.hour * 60 +
+        start.minute;
+
+    const endMinutes =
+        end.hour * 60 +
+        end.minute;
+
+    // Calculamos cuántos días dura el evento
+    const startDate =
+        new Date(event.start_date + "T00:00:00");
+
+    const endDate =
+        new Date(event.end_date + "T00:00:00");
+
+    const differenceMs =
+        endDate - startDate;
+
+    const differenceDays =
+        Math.round(
+            differenceMs / (1000 * 60 * 60 * 24)
+        );
+
+    // Duración total en minutos
+    let duration =
+        differenceDays * 24 * 60 +
+        (endMinutes - startMinutes);
+
+    // Por seguridad, si termina antes de empezar
+    // también lo consideramos como evento que pasa al día siguiente
+    if (duration <= 0) {
+        duration += 24 * 60;
+    }
+
+    let remaining =
+        duration;
+
+    let currentDay =
+        dayIndex;
+
+    let currentStart =
+        startMinutes;
+
+    while (remaining > 0) {
+
+        // Minutos que quedan disponibles hasta las 00:00
+        const available =
+            24 * 60 - currentStart;
+
+        const partDuration =
+            Math.min(
+                remaining,
+                available
+            );
+
+        createScheduleEventPart(
+            event,
+            currentDay,
+            currentStart,
+            currentStart + partDuration
+        );
+
+        remaining -= partDuration;
+
+        currentDay =
+            (currentDay + 1) % 7;
+
+        currentStart = 0;
+    }
+}
+
+
+
+
+function createScheduleEventPart(
+    event,
+    day,
+    startTotal,
+    endTotal
+) {
+
+    // Si no hay duración, no dibujamos nada.
+
+    if (endTotal <= startTotal) {
+        return;
+    }
+
+    const startHour =
+        Math.floor(startTotal / 60);
+
+    const cell =
+        document.querySelector(
+            `.schedule-cell[data-day="${day}"][data-hour="${startHour}"]`
+        );
+
+    if (!cell) {
+        return;
+    }
+
+    const eventElement =
+        document.createElement("div");
+
+    eventElement.classList.add(
+        "schedule-event"
+    );
+
+    eventElement.textContent =
+        event.title;
+
+    eventElement.style.backgroundColor =
+        event.color;
+
+
+    // ==========================================
+    // POSICIÓN VERTICAL
+    // ==========================================
+
+    const cellHeight =
+        cell.offsetHeight;
+
+    const minutesInsideHour =
+        startTotal % 60;
+
+    eventElement.style.top =
+        `${(minutesInsideHour / 60) * cellHeight}px`;
+
+
+    // ==========================================
+    // ALTURA
+    // ==========================================
+
+    const duration =
+        endTotal - startTotal;
+
+    eventElement.style.height =
+        `${(duration / 60) * cellHeight}px`;
+
+
+    if (duration <= 40) {
+        eventElement.style.fontSize = "10px";
+        eventElement.style.padding = "1px 4px";
+        eventElement.style.fontWeight = "500";
+    }
+
+    if (duration <= 15) {
+        eventElement.textContent = "";
+    }
+
+    // ==========================================
+    // CLICK
+    // ==========================================
+
+    eventElement.addEventListener(
+        "click",
+        (e) => {
+
+            e.stopPropagation();
+
+            openScheduleInfo(event);
+
+        }
+    );
+
+
+    cell.appendChild(eventElement);
+}
 
 
 
@@ -216,36 +468,283 @@ function createSchedule() {
 
 //ABRIR MODAL DE CREAR EVENTO
 
-function openScheduleModal(dayIndex, hour) {
+function openScheduleModal(dayIndex, hour, event = null) {
 
-    const modal = document.getElementById("scheduleModal");
+    const modal =
+        document.getElementById("scheduleModal");
 
-    const dayInput = document.getElementById("scheduleDay");
-    const startInput = document.getElementById("scheduleStart");
-    const endInput = document.getElementById("scheduleEnd");
+    const startDayInput =
+        document.getElementById("scheduleStartDate");
 
-    dayInput.value = dayIndex;
+    const endDayInput =
+        document.getElementById("scheduleEndDate");
 
-    startInput.value = `${String(hour).padStart(2, "0")}:00`;
+    const startInput =
+        document.getElementById("eventTime");
 
-    const nextHour = hour + 1;
+    const endInput =
+        document.getElementById("eventEndTime");
 
-    if (nextHour <= 23) {
+    const repeatCheckbox =
+        document.getElementById("scheduleRepeat");
 
-        endInput.value = `${String(nextHour).padStart(2, "0")}:00`;
-    } else {
-        endInput.value = "23:59";
+    const repeatDaysGroup =
+        document.getElementById("repeatDaysGroup");
+
+    const titleInput =
+        document.getElementById("scheduleTitle");
+
+    const subjectInput =
+        document.getElementById("scheduleSubject");
+
+    const colorInput =
+        document.getElementById("scheduleColor");
+
+    const calendarInput =
+        document.getElementById("scheduleCalendar");
+
+    const descriptionInput =
+        document.getElementById("scheduleDescription");
+
+    const showInCalendarInput =
+        document.getElementById("eventShowInCalendar");
+
+    const formError =
+        document.getElementById("formError");
+
+    const formTitle =
+        document.getElementById("eventFormTitle");
+
+
+    // ==========================================
+    // LIMPIAR DÍAS DE REPETICIÓN
+    // ==========================================
+
+    document
+        .querySelectorAll(".event-repeat-day")
+        .forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+
+    // ==========================================
+    // MODO EDITAR
+    // ==========================================
+
+    if (event) {
+
+        editingScheduleEvent = event;
+
+        formTitle.textContent = "Editar evento";
+
+        titleInput.value =
+            event.title || "";
+
+        subjectInput.value =
+            event.subject_id || "";
+
+        colorInput.value =
+            event.color || "#60A561";
+
+        calendarInput.value =
+            event.calendar_id || "";
+
+        startDayInput.value =
+            event.start_date || "";
+
+        endDayInput.value =
+            event.end_date || "";
+
+        startInput.value =
+            event.start_time
+                ? event.start_time.slice(0, 5)
+                : "";
+
+        endInput.value =
+            event.end_time
+                ? event.end_time.slice(0, 5)
+                : "";
+
+        descriptionInput.value =
+            event.description || "";
+
+        repeatCheckbox.checked =
+            event.repeat || false;
+        
+        updateRepeatDateState();
+
+        showInCalendarInput.checked =
+            event.show_in_calendar !== false;
+
+
+        if (event.repeat) {
+
+            repeatDaysGroup.style.display = "block";
+
+            const repeatDays =
+                event.repeat_days || [];
+
+            document
+                .querySelectorAll(".event-repeat-day")
+                .forEach(checkbox => {
+
+                    checkbox.checked =
+                        repeatDays.includes(
+                            Number(checkbox.value)
+                        );
+
+                });
+
+        } else {
+
+            repeatDaysGroup.style.display = "none";
+
+        }
+
     }
+
+
+    // ==========================================
+    // MODO CREAR
+    // ==========================================
+
+    else {
+
+        editingScheduleEvent = null;
+
+        formTitle.textContent = "Nuevo evento";
+
+        const selectedDate =
+            getMonday(currentWeekOffset);
+
+        selectedDate.setDate(
+            selectedDate.getDate() + dayIndex
+        );
+
+
+        const formatDate = date => {
+
+            return `${date.getFullYear()}-${String(
+                date.getMonth() + 1
+            ).padStart(2, "0")}-${String(
+                date.getDate()
+            ).padStart(2, "0")}`;
+
+        };
+
+
+        startDayInput.value =
+            formatDate(selectedDate);
+
+        endDayInput.value =
+            formatDate(selectedDate);
+
+
+        startInput.value =
+            `${String(hour).padStart(2, "0")}:00`;
+
+
+        const nextHour = hour + 1;
+
+        if (nextHour <= 23) {
+
+            endInput.value =
+                `${String(nextHour).padStart(2, "0")}:00`;
+
+        } else {
+
+            endInput.value = "23:59";
+
+        }
+
+
+        repeatCheckbox.checked = false;
+
+        repeatDaysGroup.style.display = "none";
+
+        subjectInput.value = "";
+
+        colorInput.value = "#60A561";
+
+        descriptionInput.value = "";
+
+        showInCalendarInput.checked = true;
+
+        if (scheduleCalendar.options.length > 1) {
+
+            scheduleCalendar.selectedIndex = 1;
+
+        }
+
+    }
+
+
+    // Limpiar error
+
+    formError.textContent = "";
+    formError.classList.remove("show");
+
+
+    // Abrir modal
 
     modal.classList.add("show");
 }
+
+
+
+
+
+
+
+
+const scheduleRepeat =
+    document.getElementById("scheduleRepeat");
+
+const repeatDaysGroup =
+    document.getElementById("repeatDaysGroup");
+
+const scheduleStartDate =
+    document.getElementById("scheduleStartDate");
+
+const scheduleEndDate =
+    document.getElementById("scheduleEndDate");
+
+
+scheduleRepeat.addEventListener("change", () => {
+    repeatDaysGroup.style.display = scheduleRepeat.checked ? "block" : "none";
+
+    updateRepeatDateState();
+});
+
+function updateRepeatDateState() {
+    const isRepeating = scheduleRepeat.checked;
+
+    scheduleEndDate.disabled = isRepeating;
+
+    if (isRepeating) {
+        scheduleEndDate.value = scheduleStartDate.value;
+    }
+}
+
+scheduleStartDate.addEventListener("change", () => {
+
+    if (scheduleRepeat.checked) {
+
+        scheduleEndDate.value =
+            scheduleStartDate.value;
+
+    }
+
+});
+
+
 
 const addScheduleEvent =
     document.getElementById("addScheduleEvent");
 
 addScheduleEvent.addEventListener("click", () => {
 
-    openScheduleModal(0, 8);
+    openScheduleModal(null, null, event);
 
 });
 
@@ -267,21 +766,33 @@ const saveSchedule =
     document.getElementById("saveSchedule");
 
 
+
+
+
+
+
+
+
+
 //GUARDAR EVENTO EN EL HORARIO
+
 
 saveSchedule.addEventListener("click", async () => {
 
     const title =
         document.getElementById("scheduleTitle").value.trim();
 
-    const day =
-        Number(document.getElementById("scheduleDay").value);
+    const startDate =
+        document.getElementById("scheduleStartDate").value;
+
+    const endDate =
+        document.getElementById("scheduleEndDate").value;
 
     const start =
-        document.getElementById("scheduleStart").value;
+        document.getElementById("eventTime").value;
 
     const end =
-        document.getElementById("scheduleEnd").value;
+        document.getElementById("eventEndTime").value;
 
     const color =
         document.getElementById("scheduleColor").value;
@@ -292,145 +803,394 @@ saveSchedule.addEventListener("click", async () => {
     const repeat =
         document.getElementById("scheduleRepeat").checked;
 
+    const showInCalendar =
+        document.getElementById("eventShowInCalendar").checked;
+
+    const calendarId =
+        document.getElementById("scheduleCalendar").value;
+
+    const subjectId =
+        document.getElementById("scheduleSubject").value || null;
+
+    const repeatDays =
+        Array.from(
+            document.querySelectorAll(".event-repeat-day:checked")
+        ).map(checkbox => Number(checkbox.value));
 
     const formError =
-        document.getElementById("scheduleFormError");
-
+        document.getElementById("formError");
 
     formError.textContent = "";
 
 
-    if (!title || !start || !end) {
+    // ==============================
+    // VALIDACIONES
+    // ==============================
+
+    if (!title) {
 
         formError.textContent =
-            "Completa los campos obligatorios.";
-
+            "Piensa un título";
+        formError.classList.add("show");
         return;
 
     }
 
 
-    const [startHour, startMinute] =
-        start.split(":").map(Number);
-
-    const [endHour, endMinute] =
-        end.split(":").map(Number);
-
-
-    const startTotal =
-        startHour * 60 + startMinute;
-
-    const endTotal =
-        endHour * 60 + endMinute;
-
-
-    if (endTotal <= startTotal) {
-
+    if (!startDate || !endDate) {
         formError.textContent =
-            "La hora de finalización debe ser posterior a la de inicio.";
-
+            "Determina las fechas del evento";
+        formError.classList.add("show");
         return;
+    }
+
+    if (!start || !end) {
+        formError.textContent =
+            "Determina la duración del evento";
+        formError.classList.add("show");
+        return;
+    }
+
+    if (!calendarId) {
+        formError.textContent =
+            "Selecciona un calendario";
+        formError.classList.add("show");
+        return;
+    }
+
+    if (repeat && repeatDays.length === 0) {
+        formError.textContent =
+            "Selecciona al menos un día de repetición";
+        formError.classList.add("show");
+        return;
+    }
+
+
+    // ==============================
+    // COMPROBAR FECHAS
+    // ==============================
+
+    const startDateTime =
+        new Date(`${startDate}T${start}`);
+
+    const endDateTime =
+        new Date(`${endDate}T${end}`);
+
+
+    if (endDateTime <= startDateTime) {
+        formError.textContent =
+            "La finalización debe ser posterior al inicio.";
+        formError.classList.add("show");
+        return;
+    }
+
+  // ==============================
+    // CREAR O EDITAR EVENTO
+    // ==============================
+
+    let data;
+    let error;
+
+    const eventData = {
+
+        title: title,
+
+        subject_id: subjectId,
+
+        calendar_id: calendarId,
+
+        description: description || null,
+
+        color: color,
+
+        start_date: startDate,
+
+        end_date: endDate,
+
+        start_time: start,
+
+        end_time: end,
+
+        repeat: repeat,
+
+        repeat_days: repeat
+            ? repeatDays
+            : [],
+
+        show_in_calendar: showInCalendar
+
+    };
+
+
+    // ==========================================
+    // EDITAR EVENTO
+    // ==========================================
+
+    if (editingScheduleEvent) {
+
+        const result =
+            await supabaseClient
+                .from("events")
+                .update(eventData)
+                .eq("id", editingScheduleEvent.id)
+                .select()
+                .single();
+
+        data = result.data;
+        error = result.error;
 
     }
 
 
-    const { data: userData, error: userError } =
-        await supabaseClient.auth.getUser();
+    // ==========================================
+    // CREAR EVENTO
+    // ==========================================
+
+    else {
+
+        const {
+            data: userData,
+            error: userError
+        } = await supabaseClient.auth.getUser();
 
 
-    if (userError || !userData.user) {
+        if (userError || !userData.user) {
+            formError.textContent =
+                "No se ha podido identificar al usuario.";
+            formError.classList.add("show");
+            return;
+        }
 
-        formError.textContent =
-            "No se ha podido identificar al usuario.";
 
-        return;
+        const result =
+            await supabaseClient
+                .from("events")
+                .insert({
+
+                    user_id: userData.user.id,
+
+                    ...eventData
+
+                })
+                .select()
+                .single();
+
+
+        data = result.data;
+        error = result.error;
 
     }
 
-    const monday = getMonday(currentWeekOffset);
 
-    const weekStart = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, "0")}-${String(monday.getDate()).padStart(2, "0")}`;
-        
-    const { data, error } = await supabaseClient
-        .from("schedule")
-        .insert({
-
-            user_id: userData.user.id,
-
-            title: title,
-
-            day: day,
-
-            start_time: start,
-
-            end_time: end,
-
-            color: color,
-
-            description: description,
-
-            repeat: repeat,
-            week_start: repeat ? null : weekStart
-
-        })
-        .select()
-        .single();
-
+    // ==========================================
+    // ERROR
+    // ==========================================
 
     if (error) {
-
-        console.error("Error creando evento:", error);
+        console.error(
+            "Error guardando evento:",
+            error
+        );
 
         formError.textContent =
-            "No se ha podido crear el evento.";
+            error.message ||
+            "No se ha podido guardar el evento.";
 
+        formError.classList.add("show");
         return;
+    }
+
+
+    // ==============================
+    // ACTUALIZAR HORARIO
+    // ==============================
+
+    if (editingScheduleEvent) {
+
+        const index =
+            scheduleEvents.findIndex(
+                event =>
+                    event.id === editingScheduleEvent.id
+            );
+
+        if (index !== -1) {
+
+            scheduleEvents[index] = data;
+
+        }
+
+    } else {
+
+        scheduleEvents.push(data);
 
     }
 
 
-    scheduleEvents.push(data);
-
+    // ==============================
+    // CERRAR MODAL
+    // ==============================
 
     document
         .getElementById("scheduleModal")
         .classList.remove("show");
 
 
+    // ==============================
+    // LIMPIAR FORMULARIO
+    // ==============================
+
     document.getElementById("scheduleTitle").value = "";
 
-    document.getElementById("scheduleDescription").value = "";
+    document.getElementById("scheduleSubject").value = "";
+
+    document.getElementById("scheduleStartDate").value = "";
+
+    document.getElementById("scheduleEndDate").value = "";
+
+    document.getElementById("scheduleEndDate").disabled = false;
+
+    document.getElementById("eventTime").value = "";
+
+    document.getElementById("eventEndTime").value = "";
 
     document.getElementById("scheduleColor").value = "#60A561";
 
-    document.getElementById("scheduleRepeat").checked = true;
+    document.getElementById("scheduleDescription").value = "";
 
+    document.getElementById("scheduleRepeat").checked = false;
+
+    document.getElementById("repeatDaysGroup").style.display = "none";
+
+    document.getElementById("eventShowInCalendar").checked = true;
+
+    document
+        .querySelectorAll(".event-repeat-day")
+        .forEach(checkbox => {
+
+            checkbox.checked = false;
+
+        });
+
+    editingScheduleEvent = null;
+
+    // ==============================
+    // VOLVER A DIBUJAR
+    // ==============================
 
     renderScheduleEvents();
 
 });
 
 
+
+
+
+
+
+
+
+
+
 //ABRIR MODAL INFO EVENTO
 
 function openScheduleInfo(event) {
 
-    const modal = document.getElementById("scheduleInfoModal");
+    editingScheduleEvent = event;
 
-    document.getElementById("scheduleInfoTitle").textContent =
-        event.title;
+    const modal =
+        document.getElementById("scheduleInfoModal");
 
-    document.getElementById("scheduleInfoDay").textContent =
-        days[event.day];
 
-    document.getElementById("scheduleInfoTime").textContent =
-        `${event.start_time.slice(0, 5)} - ${event.end_time.slice(0, 5)}`;
+    document
+        .getElementById("scheduleInfoTitle")
+        .textContent = event.title;
 
-    document.getElementById("scheduleInfoDescription").textContent =
-        event.description || "Sin descripción";
+
+    // ==========================================
+    // DÍA
+    // ==========================================
+
+    let dayText = "";
+
+    if (event.repeat) {
+
+        const repeatDays =
+            event.repeat_days || [];
+
+        dayText =
+            repeatDays
+                .map(day => days[day])
+                .join(", ");
+
+    } else {
+
+        const eventDate =
+            new Date(event.start_date + "T00:00:00");
+
+        const jsDay =
+            eventDate.getDay();
+
+        const dayIndex =
+            (jsDay + 6) % 7;
+
+        dayText =
+            days[dayIndex];
+
+        if (
+            event.end_date &&
+            event.end_date !== event.start_date
+        ) {
+
+            const endDate =
+                new Date(event.end_date + "T00:00:00");
+
+            const endJsDay =
+                endDate.getDay();
+
+            const endDayIndex =
+                (endJsDay + 6) % 7;
+
+            dayText +=
+                ` → ${days[endDayIndex]}`;
+
+        }
+
+    }
+
+
+    document
+        .getElementById("scheduleInfoDay")
+        .textContent = dayText;
+
+
+    // ==========================================
+    // HORARIO
+    // ==========================================
+
+    document
+        .getElementById("scheduleInfoTime")
+        .textContent =
+            `${event.start_time.slice(0, 5)} - ${event.end_time.slice(0, 5)}`;
+
+
+    // ==========================================
+    // DESCRIPCIÓN
+    // ==========================================
+
+    document
+        .getElementById("scheduleInfoDescription")
+        .textContent =
+            event.description || "Sin descripción";
+
 
     modal.classList.add("show");
 }
+
+
+
+
+
+
 
 const closeScheduleInfo =
     document.getElementById("closeScheduleInfo");
@@ -441,6 +1201,103 @@ closeScheduleInfo.addEventListener("click", () => {
     document
         .getElementById("scheduleInfoModal")
         .classList.remove("show");
+
+});
+
+const editSchedule =
+    document.getElementById("editSchedule");
+
+editSchedule.addEventListener("click", () => {
+
+    if (!editingScheduleEvent) {
+        return;
+    }
+
+    const event =
+        editingScheduleEvent;
+
+    // Cerrar modal de información
+    document
+        .getElementById("scheduleInfoModal")
+        .classList.remove("show");
+
+
+    // Abrir modal de edición
+    openScheduleModal(
+        0,
+        8,
+        event
+    );
+
+});
+
+
+const deleteSchedule =
+    document.getElementById("deleteSchedule");
+
+deleteSchedule.addEventListener("click", async () => {
+
+    if (!editingScheduleEvent) {
+        return;
+    }
+
+
+    const event =
+        editingScheduleEvent;
+
+
+    const confirmed =
+        confirm(
+            `¿Quieres eliminar "${event.title}"?`
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    const { error } =
+        await supabaseClient
+            .from("events")
+            .delete()
+            .eq("id", event.id);
+
+
+    if (error) {
+
+        console.error(
+            "Error eliminando evento:",
+            error
+        );
+
+        return;
+
+    }
+
+
+    // Eliminarlo de la lista local
+
+    scheduleEvents =
+        scheduleEvents.filter(
+            scheduleEvent =>
+                scheduleEvent.id !== event.id
+        );
+
+
+    // Cerrar modal
+
+    document
+        .getElementById("scheduleInfoModal")
+        .classList.remove("show");
+
+
+    editingScheduleEvent = null;
+
+
+    // Redibujar horario
+
+    renderScheduleEvents();
 
 });
 
@@ -577,5 +1434,7 @@ function updateTodayHeader() {
 
 createSchedule();
 loadScheduleEvents();
+loadScheduleCalendars();
+loadScheduleSubjects();
 updateWeekRange();
 updateTodayHeader();

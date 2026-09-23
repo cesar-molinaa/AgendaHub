@@ -79,13 +79,15 @@ cancelEvent.addEventListener("click", () => {
 
 let eventos = [];
 
+
 async function loadEvents() {
 
     const { data, error } = await supabaseClient
         .from("events")
         .select("*")
-        .order("date", { ascending: true })
-        .order("time", { ascending: true });
+        .eq("show_in_calendar", true)
+        .order("start_date", { ascending: true })
+        .order("start_time", { ascending: true });
 
     if (error) {
         console.error("Error cargando eventos:", error);
@@ -97,8 +99,23 @@ async function loadEvents() {
         titulo: evento.title,
         asignatura: evento.subject_id,
         calendario: evento.calendar_id,
-        fecha: evento.date,
-        hora: evento.time,
+
+        fecha: evento.start_date,
+        hora: evento.start_time
+            ? evento.start_time.slice(0, 5)
+            : null,
+
+        fechaFin: evento.end_date,
+        horaFin: evento.end_time
+            ? evento.end_time.slice(0, 5)
+            : null,
+
+        color: evento.color,
+
+        repetir: evento.repeat,
+        diasRepeticion: evento.repeat_days,
+        mostrarEnCalendario: evento.show_in_calendar,
+
         descripcion: evento.description
     }));
 
@@ -116,6 +133,8 @@ async function loadEvents() {
     }
 }
 
+
+
 const eventFormTitle = document.getElementById("eventFormTitle");
 
 const eventTitle = document.getElementById("eventTitle");
@@ -123,6 +142,23 @@ const eventSubject = document.getElementById("eventSubject");
 const eventCalendar = document.getElementById("eventCalendar");
 const eventDate = document.getElementById("eventDate");
 const eventTime = document.getElementById("eventTime");
+
+const eventEndDate =
+    document.getElementById("eventEndDate");
+
+const eventEndTime =
+    document.getElementById("eventEndTime");
+
+const eventRepeat =
+    document.getElementById("eventRepeat");
+
+const eventRepeatOptions =
+    document.getElementById("eventRepeatOptions");
+
+const eventShowInCalendar =
+    document.getElementById("eventShowInCalendar");
+
+
 const eventDescription = document.getElementById("eventDescription");
 
 const saveEvent = document.getElementById("saveEvent");
@@ -132,11 +168,70 @@ const formError = document.getElementById("formError");
 
 
 
+eventRepeat.addEventListener("change", () => {
+
+    if (eventRepeat.checked) {
+
+        eventRepeatOptions.style.display = "block";
+
+    } else {
+
+        eventRepeatOptions.style.display = "none";
+
+    }
+
+});
+
+
 function getSubjectById(subjectId) {
 
     return subjects.find(subject => subject.id == subjectId);
 
 }
+
+function eventoApareceEnFecha(evento, fechaFormateada) {
+
+    // EVENTO REPETITIVO
+
+    if (evento.repetir) {
+
+        const fecha = new Date(fechaFormateada + "T00:00");
+
+        const jsDay = fecha.getDay();
+
+
+        const dayIndex = (jsDay + 6) % 7;
+
+        return (evento.diasRepeticion || []).includes(dayIndex);
+    }
+
+    // EVENTO NORMAL
+
+    return evento.fecha === fechaFormateada;
+}
+
+function obtenerTextoDiasRepeticion(evento) {
+
+    if (!evento.repetir || !evento.diasRepeticion) {
+        return "";
+    }
+
+    const nombresDias = [
+        "Lunes",
+        "Martes",
+        "Miércoles",
+        "Jueves",
+        "Viernes",
+        "Sábado",
+        "Domingo"
+    ];
+
+    return evento.diasRepeticion
+        .sort((a, b) => a - b)
+        .map(dia => nombresDias[dia])
+        .join(", ");
+}
+
 
 
 
@@ -602,9 +697,18 @@ saveEvent.addEventListener("click", async () => {
                 title: titulo,
                 subject_id: asignatura || null,
                 calendar_id: calendario,
-                date: fecha,
-                time: hora || null,
-                description: descripcion || null
+
+                start_date: fecha,
+                end_date: fecha,
+
+                start_time: hora || null,
+                end_time: hora || null,
+
+                description: descripcion || null,
+
+                color: asignatura
+                    ? getSubjectById(asignatura)?.color
+                    : "#FCB55F"
             })
             .eq("id", eventoSeleccionado.id)
             .select()
@@ -621,11 +725,11 @@ saveEvent.addEventListener("click", async () => {
 
         // ACTUALIZAR EL EVENTO QUE YA TENEMOS EN MEMORIA
 
-        eventoSeleccionado.titulo = data.title;
-        eventoSeleccionado.asignatura = data.subject_id;
-        eventoSeleccionado.calendario = data.calendar_id;
-        eventoSeleccionado.fecha = data.date;
-        eventoSeleccionado.hora = data.time;
+        eventoSeleccionado.fecha = data.start_date;
+        eventoSeleccionado.hora = data.start_time;
+        eventoSeleccionado.fechaFin = data.end_date;
+        eventoSeleccionado.horaFin = data.end_time;
+        eventoSeleccionado.color = data.color;
         eventoSeleccionado.descripcion = data.description;
 
     }
@@ -642,9 +746,23 @@ saveEvent.addEventListener("click", async () => {
                 title: titulo,
                 subject_id: asignatura || null,
                 calendar_id: calendario,
-                date: fecha,
-                time: hora || null,
-                description: descripcion || null
+
+                start_date: fecha,
+                end_date: fecha,
+
+                start_time: hora || null,
+                end_time: hora || null,
+
+                description: descripcion || null,
+
+                color: asignatura
+                    ? getSubjectById(asignatura)?.color
+                    : "#FCB55F",
+
+                repeat: false,
+                repeat_days: [],
+
+                show_in_calendar: true
             })
             .select()
             .single();
@@ -665,8 +783,16 @@ saveEvent.addEventListener("click", async () => {
             titulo: data.title,
             asignatura: data.subject_id,
             calendario: data.calendar_id,
-            fecha: data.date,
-            hora: data.time,
+            
+            fecha: data.start_date,
+            hora: data.start_time,
+            fechaFin: data.end_date,
+            horaFin: data.end_time,
+            color: data.color,
+            repetir: data.repeat,
+            diasRepeticion: data.repeat_days,
+            mostrarEnCalendario: data.show_in_calendar,
+
             descripcion: data.description
         });
 
@@ -870,7 +996,7 @@ function mostrarCalendario() {
         //BUSCAR EVENTOS DE ESTE DÍA
 
         const eventosDelDia = eventos
-        .filter(evento => evento.fecha === fechaFormateada)
+        .filter(evento => eventoApareceEnFecha(evento, fechaFormateada))
         .filter(evento => {
 
             const calendario = calendarios.find(
@@ -901,13 +1027,19 @@ function mostrarCalendario() {
             eventElement.textContent = evento.titulo;
 
             
-            const subject = getSubjectById(evento.asignatura);
+            if (evento.color) {
+                    eventElement.style.backgroundColor = evento.color;
+                } else {
 
-            if (subject) {
-                eventElement.style.backgroundColor = subject.color;
-            } else {
-                eventElement.style.backgroundColor = "#FCB55F";
-            }
+                    const subject = getSubjectById(evento.asignatura);
+
+                    if (subject) {
+                        eventElement.style.backgroundColor = subject.color;
+                    } else {
+                        eventElement.style.backgroundColor = "#FCB55F";
+                    }
+
+                }
 
 
             eventElement.addEventListener("click", (event) => {
@@ -923,8 +1055,23 @@ function mostrarCalendario() {
                 ? subject.name
                 : "Sin asignatura";
 
-                infoDate.textContent = evento.fecha;
-                infoTime.textContent = evento.hora || "Sin hora";
+                if (evento.repetir) {
+
+                    infoDate.textContent =
+                        `Se repite: ${obtenerTextoDiasRepeticion(evento)}`;
+                    infoTime.textContent =
+                        `${evento.hora || "Sin hora"} - ${evento.horaFin || "Sin hora"}`;
+
+                } else {
+
+                    infoDate.textContent =
+                        evento.fecha;
+                    infoTime.textContent =
+                        `${evento.hora || "Sin hora"} - ${evento.horaFin || "Sin hora"}`;
+
+                }
+
+
                 infoDescription.textContent =
                     evento.descripcion || "Sin descripción";
 
@@ -1080,7 +1227,7 @@ function mostrarSemana() {
         // BUSCAR EVENTOS DE ESTE DÍA
 
         const eventosDelDia = eventos
-        .filter(evento => evento.fecha === fechaFormateada)
+        .filter(evento => eventoApareceEnFecha(evento, fechaFormateada))
         .filter(evento => {
 
             const calendario = calendarios.find(
@@ -1110,12 +1257,18 @@ function mostrarSemana() {
             eventElement.textContent = evento.titulo;
 
             
-            const subject = getSubjectById(evento.asignatura);
-
-            if (subject) {
-                eventElement.style.backgroundColor = subject.color;
+            if (evento.color) {
+                eventElement.style.backgroundColor = evento.color;
             } else {
-                eventElement.style.backgroundColor = "#FCB55F";
+
+                const subject = getSubjectById(evento.asignatura);
+
+                if (subject) {
+                    eventElement.style.backgroundColor = subject.color;
+                } else {
+                    eventElement.style.backgroundColor = "#FCB55F";
+                }
+
             }
 
 
@@ -1134,10 +1287,25 @@ function mostrarSemana() {
                 ? subject.name
                 : "Sin asignatura";
 
-                infoDate.textContent = evento.fecha;
+                if (evento.repetir) {
 
-                infoTime.textContent =
-                    evento.hora || "Sin hora";
+                    infoDate.textContent =
+                        `Se repite: ${obtenerTextoDiasRepeticion(evento)}`;
+
+                    infoTime.textContent =
+                        `${evento.hora || "Sin hora"} - ${evento.horaFin || "Sin hora"}`;
+
+                } else {
+
+                    infoDate.textContent =
+                        evento.fecha;
+
+                    infoTime.textContent =
+                        `${evento.hora || "Sin hora"} - ${evento.horaFin || "Sin hora"}`;
+
+                }
+
+
 
                 infoDescription.textContent =
                     evento.descripcion || "Sin descripción";
@@ -1254,7 +1422,7 @@ function mostrarDia() {
     // BUSCAR LOS EVENTOS DE ESTE DÍA
 
     const eventosDelDia = eventos
-    .filter(evento => evento.fecha === fechaFormateada)
+    .filter(evento => eventoApareceEnFecha(evento, fechaFormateada))
     .filter(evento => {
 
         const calendario = calendarios.find(
@@ -1285,12 +1453,18 @@ function mostrarDia() {
         eventElement.textContent = evento.titulo;
 
         
-        const subject = getSubjectById(evento.asignatura);
-
-            if (subject) {
-                eventElement.style.backgroundColor = subject.color;
+        if (evento.color) {
+                eventElement.style.backgroundColor = evento.color;
             } else {
-                eventElement.style.backgroundColor = "#FCB55F";
+
+                const subject = getSubjectById(evento.asignatura);
+
+                if (subject) {
+                    eventElement.style.backgroundColor = subject.color;
+                } else {
+                    eventElement.style.backgroundColor = "#FCB55F";
+                }
+
             }
 
 
@@ -1309,10 +1483,25 @@ function mostrarDia() {
             ? subject.name
             : "Sin asignatura";
 
-            infoDate.textContent = evento.fecha;
+            if (evento.repetir) {
 
-            infoTime.textContent =
-                evento.hora || "Sin hora";
+                    infoDate.textContent =
+                        `Se repite: ${obtenerTextoDiasRepeticion(evento)}`;
+
+                    infoTime.textContent =
+                        `${evento.hora || "Sin hora"} - ${evento.horaFin || "Sin hora"}`;
+
+                } else {
+
+                    infoDate.textContent =
+                        evento.fecha;
+
+                    infoTime.textContent =
+                        `${evento.hora || "Sin hora"} - ${evento.horaFin || "Sin hora"}`;
+
+                }
+
+
 
             infoDescription.textContent =
                 evento.descripcion || "Sin descripción";
@@ -1419,12 +1608,52 @@ editEvent.addEventListener("click", () => {
 
     eventFormTitle.textContent = "Editar evento";
 
-    eventTitle.value = eventoSeleccionado.titulo;
-    eventSubject.value = eventoSeleccionado.asignatura;
-    eventCalendar.value = eventoSeleccionado.calendario;
-    eventDate.value = eventoSeleccionado.fecha;
-    eventTime.value = eventoSeleccionado.hora;
-    eventDescription.value = eventoSeleccionado.descripcion;
+    eventTitle.value =
+        eventoSeleccionado.titulo || "";
+
+    eventSubject.value =
+        eventoSeleccionado.asignatura || "";
+
+    eventCalendar.value =
+        eventoSeleccionado.calendario || "";
+
+    eventDate.value =
+        eventoSeleccionado.fecha || "";
+
+    eventEndDate.value =
+        eventoSeleccionado.fechaFin ||
+        eventoSeleccionado.fecha ||
+        "";
+
+    eventTime.value =
+        eventoSeleccionado.hora || "";
+
+    eventEndTime.value =
+        eventoSeleccionado.horaFin ||
+        eventoSeleccionado.hora ||
+        "";
+
+    eventDescription.value =
+        eventoSeleccionado.descripcion || "";
+
+    eventRepeat.checked =
+        eventoSeleccionado.repetir || false;
+
+    eventShowInCalendar.checked =
+        eventoSeleccionado.mostrarEnCalendario !== false;
+
+    eventRepeatOptions.style.display =
+        eventRepeat.checked ? "block" : "none";
+
+    document
+        .querySelectorAll(".event-repeat-day")
+        .forEach(checkbox => {
+
+            checkbox.checked =
+                (eventoSeleccionado.diasRepeticion || [])
+                    .includes(Number(checkbox.value));
+
+        });
 
     eventModal.classList.add("show");
 

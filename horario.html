@@ -31,8 +31,8 @@
     <div class="sidebar" id="sidebar">
 
         <div class="item"><img src="imgs/casa.png"><a href="index.html">Inicio</a></div>
-        <div class="item"><img src="imgs/calendar.png" alt=""><a href="calendario.html">Calendario</a></div>
         <div class="item"><img src="imgs/schedule.png" alt=""><a href="horario.html">Horario</a></div>
+        <div class="item"><img src="imgs/calendar.png" alt=""><a href="calendario.html">Calendario</a></div>
         <div class="item"><img src="imgs/task.png" alt=""><a href="task.html">Tareas</a></div>
         <div class="item"><img src="imgs/bars.png" alt=""><a href="mark.html">Calificaciones</a></div>
         <div class="item"><img src="imgs/libro.png" alt=""><a href="subjects.html">Asignaturas</a></div>
@@ -90,137 +90,266 @@
 
     <!-- MODAL CREAR EVENTO -->
 
-    <div id="scheduleModal" class="modal">
+    <div class="modal" id="scheduleModal">
 
-        <div class="schedule-form">
+        <div class="event-form">
 
-            <h2 id="scheduleModalTitle">Nuevo evento</h2>
+            <h2 id="eventFormTitle">Nuevo evento</h2>
+
 
             <div class="form-group">
 
-                <label for="scheduleTitle">
-                    Título
-                </label>
-
-                <input
+                <label for="scheduleTitle">Nombre del evento</label>
+                <input 
                     type="text"
                     id="scheduleTitle"
-                    placeholder="Título"
+                    placeholder="Nombre del evento"
                 >
 
             </div>
 
 
-            <div class="form-group">
-
-                <label for="scheduleDay">
-                    Día
-                </label>
-
-                <select id="scheduleDay">
-
-                    <option value="0">Lunes</option>
-                    <option value="1">Martes</option>
-                    <option value="2">Miércoles</option>
-                    <option value="3">Jueves</option>
-                    <option value="4">Viernes</option>
-                    <option value="5">Sábado</option>
-                    <option value="6">Domingo</option>
-
-                </select>
-
-            </div>
-
-
-            <div class="form-row">
+            <div class="event-basic-info">
 
                 <div class="form-group">
 
-                    <label for="scheduleStart">
-                        Hora de inicio
-                    </label>
+                    <label for="scheduleSubject">Asignatura</label>
+                    <select id="scheduleSubject">
+                    </select>
 
+                </div>
+
+                <div class="form-group">
+
+                    <label for="scheduleColor">Color</label>
                     <input
-                        type="time"
-                        id="scheduleStart"
+                        type="color"
+                        id="scheduleColor"
+                        value="#60A561"
                     >
 
                 </div>
 
-
                 <div class="form-group">
 
-                    <label for="scheduleEnd">
-                        Hora de finalización
-                    </label>
-
-                    <input
-                        type="time"
-                        id="scheduleEnd"
-                    >
+                    <label for="scheduleCalendar">Calendario</label>
+                    <select id="scheduleCalendar">
+                        <option value="">Selecciona un calendario</option>
+                        <option value="bachillerato">Bachillerato</option>
+                        <option value="personal">Personal</option>
+                    </select>
 
                 </div>
 
             </div>
 
+            <div class="form-section">
 
-            <div class="form-group">
+                <h3>Fecha y hora</h3>
 
-                <label for="scheduleColor">
-                    Color
-                </label>
+                <div class="event-dates">
 
-                <input
-                    type="color"
-                    id="scheduleColor"
-                    value="#60A561"
+                    <div class="form-group">
+
+                        <label for="scheduleStartDate">Inicio</label>
+                        <input 
+                            type="date"
+                            id="scheduleStartDate"
+                        >
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="scheduleEndDate">Fin</label>
+                        <input 
+                            type="date"
+                            id="scheduleEndDate"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="event-times">
+
+                    <div class="form-group">
+
+                        <label for="eventTime">Hora de inicio</label>
+                        <input 
+                            type="time"
+                            id="eventTime"
+                        >
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="eventEndTime">Hora de finalización</label>
+                        <input 
+                            type="time"
+                            id="eventEndTime"
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        <div class="advanced-options">
+
+                <button
+                    type="button"
+                    id="advancedOptionsBtn"
+                    class="advanced-options-button"
+                >
+                    <span>Opciones avanzadas</span>
+                    <span class="advanced-arrow">⌄</span>
+                </button>
+
+
+                <div
+                    id="advancedOptionsContent"
+                    class="advanced-options-content"
                 >
 
+                    <div class="form-group">
+
+                        <label class="checkbox-label">
+                            <input
+                                type="checkbox"
+                                id="scheduleRepeat"
+                            >
+                            <span>Repetir evento</span>
+
+                        </label>
+
+                    </div>
+
+
+                    <div
+                        id="repeatDaysGroup"
+                        class="event-repeat-options"
+                        style="display: none;"
+                    >
+
+                        <p>Repetir los días:</p>
+
+                        <div class="repeat-days">
+
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    class="event-repeat-day"
+                                    value="0"
+                                >
+                                Lunes
+                            </label>
+
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    class="event-repeat-day"
+                                    value="1"
+                                >
+                                Martes
+                            </label>
+
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    class="event-repeat-day"
+                                    value="2"
+                                >
+                                Miércoles
+                            </label>
+
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    class="event-repeat-day"
+                                    value="3"
+                                >
+                                Jueves
+                            </label>
+
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    class="event-repeat-day"
+                                    value="4"
+                                >
+                                Viernes
+                            </label>
+
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    class="event-repeat-day"
+                                    value="5"
+                                >
+                                Sábado
+                            </label>
+
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    class="event-repeat-day"
+                                    value="6"
+                                >
+                                Domingo
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+                <div class="form-group">
+
+                        <label class="checkbox-label">
+                            <input
+                                type="checkbox"
+                                id="eventShowInCalendar"
+                                checked
+                            >
+
+                            <span>Mostrar en el calendario</span>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
             </div>
 
 
             <div class="form-group">
 
-                <label for="scheduleDescription">
-                    Descripción
-                </label>
+                <label for="scheduleDescription">Descripción</label>
 
                 <textarea
                     id="scheduleDescription"
-                    placeholder="Descripción opcional"
+                    placeholder="Añade una descripción..."
                 ></textarea>
 
             </div>
 
 
-            <div class="form-group schedule-repeat">
-
-                <label>
-
-                    <input
-                        type="checkbox"
-                        id="scheduleRepeat"
-                        checked
-                    >
-
-                    Repetir todas las semanas
-
-                </label>
-
-            </div>
+        <p class="form-error" id="formError"></p>
 
 
-            <p id="scheduleFormError"></p>
-
-
-            <div class="modal-buttons">
+            <div class="form-buttons">
 
                 <button id="cancelSchedule">
                     Cancelar
                 </button>
 
                 <button id="saveSchedule">
-                    Crear evento
+                    Guardar
                 </button>
 
             </div>

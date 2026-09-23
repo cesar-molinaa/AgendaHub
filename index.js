@@ -22,8 +22,8 @@ async function loadDashboardData() {
         supabaseClient
             .from("events")
             .select("*")
-            .order("date", { ascending: true })
-            .order("time", { ascending: true }),
+            .order("start_date", { ascending: true })
+            .order("start_time", { ascending: true }),
 
         supabaseClient
             .from("tasks")
@@ -64,9 +64,10 @@ async function loadDashboardData() {
         titulo: event.title,
         asignatura: event.subject_id,
         calendario: event.calendar_id,
-        fecha: event.date,
-        hora: event.time,
-        descripcion: event.description
+        fecha: event.start_date,
+        hora: event.start_time,
+        descripcion: event.description,
+        color: event.color
     }));
 
     tasks = (tasksResult.data || []).map(task => ({
@@ -146,7 +147,8 @@ function renderUpcomingEvents() {
 
         const subject = getSubjectById(event.asignatura);
 
-        const subjectColor = subject ? subject.color : "#FCB55F";
+        const subjectColor = event.color || (subject ? subject.color : "#FCB55F");
+
 
         const date = new Date(event.fecha + "T00:00:00");
 
