@@ -855,11 +855,28 @@ scheduleStartDate.addEventListener("change", () => {
 const addScheduleEvent =
     document.getElementById("addScheduleEvent");
 
+
 addScheduleEvent.addEventListener("click", () => {
 
-    openScheduleModal(null, null, event);
+    const now = new Date();
+
+    const jsDay = now.getDay();
+
+    const todayIndex =
+        (jsDay + 6) % 7;
+
+    const currentHour =
+        now.getHours();
+
+    openScheduleModal(
+        todayIndex,
+        currentHour,
+        null
+    );
 
 });
+
+
 
 //CERRAR MODAL
 
