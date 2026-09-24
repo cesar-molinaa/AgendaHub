@@ -172,53 +172,150 @@ function renderScheduleEvents() {
     });
 
 
+    const monday =
+        getMonday(currentWeekOffset);
+
+    const sunday =
+        new Date(monday);
+
+    sunday.setDate(
+        sunday.getDate() + 6
+    );
+
+
     scheduleEvents.forEach(event => {
 
         /*
+        ==========================================
         EVENTOS REPETITIVOS
+        ==========================================
         */
 
         if (event.repeat) {
 
-            const repeatDays = event.repeat_days || [];
+            const repeatDays =
+                event.repeat_days || [];
 
-            repeatDays.forEach(day => {
 
-                renderEventInSchedule(event, day);
+            // Fecha de inicio del evento
+            const startDate =
+                new Date(
+                    event.start_date + "T00:00:00"
+                );
 
-            });
+
+            // Fecha de finalización del evento
+            const endDate =
+                new Date(
+                    event.end_date + "T00:00:00"
+                );
+
+
+            /*
+            Si el evento todavía no ha empezado
+            en esta semana, no lo mostramos.
+            */
+
+            if (endDate < monday) {
+                return;
+            }
+
+
+            /*
+            Si el evento ya terminó antes
+            de esta semana, no lo mostramos.
+            */
+
+            if (startDate > sunday) {
+                return;
+            }
+
+
+            /*
+            Recorremos los 7 días de la semana
+            que estamos viendo.
+            */
+
+            for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+
+                const currentDate =
+                    new Date(monday);
+
+                currentDate.setDate(
+                    currentDate.getDate() + dayIndex
+                );
+
+
+                /*
+                Comprobamos que este día esté
+                dentro del periodo del evento.
+                */
+
+                if (
+                    currentDate < startDate ||
+                    currentDate > endDate
+                ) {
+                    continue;
+                }
+
+
+                /*
+                ¿Es uno de los días en los que
+                se repite el evento?
+                */
+
+                if (
+                    repeatDays.includes(dayIndex)
+                ) {
+
+                    renderEventInSchedule(
+                        event,
+                        dayIndex
+                    );
+
+                }
+
+            }
 
             return;
         }
 
 
         /*
+        ==========================================
         EVENTOS NO REPETITIVOS
+        ==========================================
         */
 
-        const eventDate = new Date(event.start_date + "T00:00:00");
-
-        const monday = getMonday(currentWeekOffset);
-
-        const sunday = new Date(monday);
-
-        sunday.setDate(sunday.getDate() + 6);
+        const eventDate =
+            new Date(
+                event.start_date + "T00:00:00"
+            );
 
 
-        if (eventDate < monday || eventDate > sunday) {
+        if (
+            eventDate < monday ||
+            eventDate > sunday
+        ) {
             return;
         }
 
 
-        const jsDay = eventDate.getDay();
+        const jsDay =
+            eventDate.getDay();
 
-        const dayIndex = (jsDay + 6) % 7;
 
-        renderEventInSchedule(event, dayIndex);
+        const dayIndex =
+            (jsDay + 6) % 7;
+
+
+        renderEventInSchedule(
+            event,
+            dayIndex
+        );
 
     });
 }
-
 
 function renderEventInSchedule(event, dayIndex) {
 
@@ -235,31 +332,47 @@ function renderEventInSchedule(event, dayIndex) {
         end.hour * 60 +
         end.minute;
 
-    // Calculamos cuántos días dura el evento
-    const startDate =
-        new Date(event.start_date + "T00:00:00");
+    
+    let duration;
 
-    const endDate =
-        new Date(event.end_date + "T00:00:00");
+    // Los eventos repetitivos duran lo indicado
+    // por sus horas en cada repetición.
+    if (event.repeat) {
 
-    const differenceMs =
-        endDate - startDate;
+        duration =
+            endMinutes - startMinutes;
 
-    const differenceDays =
-        Math.round(
-            differenceMs / (1000 * 60 * 60 * 24)
-        );
+    } else {
 
-    // Duración total en minutos
-    let duration =
-        differenceDays * 24 * 60 +
-        (endMinutes - startMinutes);
+        // Los eventos normales sí pueden ocupar
+        // varios días.
 
-    // Por seguridad, si termina antes de empezar
-    // también lo consideramos como evento que pasa al día siguiente
+        const startDate =
+            new Date(event.start_date + "T00:00:00");
+
+        const endDate =
+            new Date(event.end_date + "T00:00:00");
+
+        const differenceMs =
+            endDate - startDate;
+
+        const differenceDays =
+            Math.round(
+                differenceMs / (1000 * 60 * 60 * 24)
+            );
+
+        duration =
+            differenceDays * 24 * 60 +
+            (endMinutes - startMinutes);
+    }
+
+
+    // Si termina antes de empezar,
+    // significa que pasa al día siguiente.
     if (duration <= 0) {
         duration += 24 * 60;
     }
+
 
     let remaining =
         duration;

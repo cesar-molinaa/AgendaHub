@@ -49,22 +49,53 @@ const addEvent = document.getElementById("addEvent");
 const eventModal = document.getElementById("eventModal");
 const cancelEvent = document.getElementById("cancelEvent");
 
-addEvent.addEventListener("click", () => {
+
+
+
+function prepararNuevoEvento(fecha = "") {
 
     editandoEvento = false;
-
     eventoSeleccionado = null;
 
     eventFormTitle.textContent = "Nuevo evento";
 
     eventTitle.value = "";
     eventSubject.value = "";
+    eventColor.value = "#60A561";
     eventCalendar.value = "";
-    eventDate.value = "";
+
+    eventDate.value = fecha;
+    eventEndDate.value = fecha;
+
     eventTime.value = "";
+    eventEndTime.value = "";
+
     eventDescription.value = "";
 
+    eventRepeat.checked = false;
+    eventRepeatOptions.style.display = "none";
+
+    document
+        .querySelectorAll(".event-repeat-day")
+        .forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+    eventShowInCalendar.checked = true;
+
+    formError.classList.remove("show");
+
     eventModal.classList.add("show");
+}
+
+
+
+
+
+
+addEvent.addEventListener("click", () => {
+
+    prepararNuevoEvento();
 
 });
 
@@ -139,6 +170,7 @@ const eventFormTitle = document.getElementById("eventFormTitle");
 
 const eventTitle = document.getElementById("eventTitle");
 const eventSubject = document.getElementById("eventSubject");
+const eventColor = document.getElementById("eventColor");
 const eventCalendar = document.getElementById("eventCalendar");
 const eventDate = document.getElementById("eventDate");
 const eventTime = document.getElementById("eventTime");
@@ -182,6 +214,16 @@ eventRepeat.addEventListener("change", () => {
 
 });
 
+eventSubject.addEventListener("change", () => {
+
+    const subject = getSubjectById(eventSubject.value);
+
+    if (subject) {
+        eventColor.value = subject.color;
+    }
+
+});
+
 
 function getSubjectById(subjectId) {
 
@@ -195,20 +237,52 @@ function eventoApareceEnFecha(evento, fechaFormateada) {
 
     if (evento.repetir) {
 
-        const fecha = new Date(fechaFormateada + "T00:00");
+        // No aparece antes de la fecha de inicio
+        if (fechaFormateada < evento.fecha) {
+            return false;
+        }
 
-        const jsDay = fecha.getDay();
+        // Si tiene una fecha de finalización posterior
+        // a la fecha de inicio, la respetamos.
+        if (
+            evento.fechaFin &&
+            evento.fechaFin !== evento.fecha &&
+            fechaFormateada > evento.fechaFin
+        ) {
+            return false;
+        }
 
+        const fecha =
+            new Date(fechaFormateada + "T00:00");
 
-        const dayIndex = (jsDay + 6) % 7;
+        const jsDay =
+            fecha.getDay();
 
-        return (evento.diasRepeticion || []).includes(dayIndex);
+        const dayIndex =
+            (jsDay + 6) % 7;
+
+        return (evento.diasRepeticion || [])
+            .includes(dayIndex);
     }
+
 
     // EVENTO NORMAL
 
-    return evento.fecha === fechaFormateada;
+    if (fechaFormateada < evento.fecha) {
+        return false;
+    }
+
+    if (
+        evento.fechaFin &&
+        fechaFormateada > evento.fechaFin
+    ) {
+        return false;
+    }
+
+    return true;
 }
+
+
 
 function obtenerTextoDiasRepeticion(evento) {
 
@@ -226,7 +300,7 @@ function obtenerTextoDiasRepeticion(evento) {
         "Domingo"
     ];
 
-    return evento.diasRepeticion
+    return [...evento.diasRepeticion]
         .sort((a, b) => a - b)
         .map(dia => nombresDias[dia])
         .join(", ");
@@ -646,7 +720,31 @@ saveEvent.addEventListener("click", async () => {
     const calendario = eventCalendar.value;
     const fecha = eventDate.value;
     const hora = eventTime.value;
+    const fechaFin = eventEndDate.value;
+    const horaFin = eventEndTime.value;
     const descripcion = eventDescription.value.trim();
+
+    const repetir = eventRepeat.checked;
+
+    const diasRepeticion = repetir
+        ? Array.from(document.querySelectorAll(".event-repeat-day:checked"))
+            .map(checkbox => Number(checkbox.value))
+        : [];
+
+    const mostrarEnCalendario = eventShowInCalendar.checked;
+
+    formError.classList.remove("show");
+
+    if (repetir && diasRepeticion.length === 0) {
+
+        formError.textContent =
+            "Selecciona al menos un día para repetir el evento";
+
+        formError.classList.add("show");
+
+        return;
+    }
+
 
     formError.classList.remove("show");
 
@@ -671,6 +769,24 @@ saveEvent.addEventListener("click", async () => {
         formError.textContent = "Introduce una fecha";
         formError.classList.add("show");
 
+        return;
+    }
+
+    if (fechaFin === "") {
+        formError.textContent = "Introduce una fecha de finalización";
+        formError.classList.add("show");
+        return;
+    }
+
+    if (fechaFin < fecha) {
+        formError.textContent = "La fecha de finalización no puede ser anterior a la fecha de inicio";
+        formError.classList.add("show");
+        return;
+    }
+
+    if (fechaFin === fecha && hora && horaFin && horaFin <= hora) {
+        formError.textContent = "La hora de finalización debe ser posterior a la hora de inicio";
+        formError.classList.add("show");
         return;
     }
 
@@ -699,16 +815,18 @@ saveEvent.addEventListener("click", async () => {
                 calendar_id: calendario,
 
                 start_date: fecha,
-                end_date: fecha,
+                end_date: fechaFin,
 
                 start_time: hora || null,
-                end_time: hora || null,
+                end_time: horaFin || hora || null,
 
                 description: descripcion || null,
 
-                color: asignatura
-                    ? getSubjectById(asignatura)?.color
-                    : "#FCB55F"
+                color: eventColor.value || "#FCB55F",
+                
+                repeat: repetir,
+                repeat_days: diasRepeticion,
+                show_in_calendar: mostrarEnCalendario
             })
             .eq("id", eventoSeleccionado.id)
             .select()
@@ -725,11 +843,21 @@ saveEvent.addEventListener("click", async () => {
 
         // ACTUALIZAR EL EVENTO QUE YA TENEMOS EN MEMORIA
 
+        eventoSeleccionado.titulo = data.title;
+        eventoSeleccionado.asignatura = data.subject_id;
+        eventoSeleccionado.calendario = data.calendar_id;
+
         eventoSeleccionado.fecha = data.start_date;
         eventoSeleccionado.hora = data.start_time;
         eventoSeleccionado.fechaFin = data.end_date;
         eventoSeleccionado.horaFin = data.end_time;
+
         eventoSeleccionado.color = data.color;
+
+        eventoSeleccionado.repetir = data.repeat;
+        eventoSeleccionado.diasRepeticion = data.repeat_days;
+        eventoSeleccionado.mostrarEnCalendario = data.show_in_calendar;
+
         eventoSeleccionado.descripcion = data.description;
 
     }
@@ -748,21 +876,19 @@ saveEvent.addEventListener("click", async () => {
                 calendar_id: calendario,
 
                 start_date: fecha,
-                end_date: fecha,
+                end_date: fechaFin || fecha,
 
                 start_time: hora || null,
-                end_time: hora || null,
+                end_time: horaFin || hora || null,
 
                 description: descripcion || null,
 
-                color: asignatura
-                    ? getSubjectById(asignatura)?.color
-                    : "#FCB55F",
+                color: eventColor.value || "#FCB55F",
 
-                repeat: false,
-                repeat_days: [],
+                repeat: repetir,
+                repeat_days: diasRepeticion,
 
-                show_in_calendar: true
+                show_in_calendar: mostrarEnCalendario
             })
             .select()
             .single();
@@ -799,24 +925,15 @@ saveEvent.addEventListener("click", async () => {
     }
 
 
+
     // CERRAR MODAL
 
     eventModal.classList.remove("show");
 
 
-    // ACTUALIZAR CALENDARIO
+    // VOLVER A CARGAR LOS EVENTOS DESDE SUPABASE
 
-    if (vistaActual === "month") {
-        mostrarCalendario();
-    }
-
-    if (vistaActual === "week") {
-        mostrarSemana();
-    }
-
-    if (vistaActual === "day") {
-        mostrarDia();
-    }
+    await loadEvents();
 
 });
 
@@ -970,25 +1087,13 @@ function mostrarCalendario() {
 
         day.addEventListener("click", () => {
 
-            // ESTAMOS CREANDO UN EVENTO NUEVO
-            editandoEvento = false;
-            eventoSeleccionado = null;
-
-            // LIMPIAR EL FORMULARIO
-            eventTitle.value = "";
-            eventSubject.value = "";
-            eventTime.value = "";
-            eventDescription.value = "";
+            prepararNuevoEvento();
 
             // PONER AUTOMÁTICAMENTE LA FECHA DEL DÍA
             fechaSeleccionada = fechaFormateada;
             eventDate.value = fechaSeleccionada;
+            eventEndDate.value = fechaSeleccionada;
 
-            // LIMPIAR POSIBLE ERROR ANTERIOR
-            formError.classList.remove("show");
-
-            // ABRIR MODAL
-            eventModal.classList.add("show");
 
         });
 
@@ -1079,13 +1184,6 @@ function mostrarCalendario() {
 
             });
 
-            eventInfoModal.addEventListener("click", (event) => {
-
-                if (event.target === eventInfoModal) {
-                    eventInfoModal.classList.remove("show");
-                }
-
-            });
 
             day.appendChild(eventElement);
 
@@ -1201,25 +1299,13 @@ function mostrarSemana() {
 
         day.addEventListener("click", () => {
 
-            editandoEvento = false;
-
-            eventoSeleccionado = null;
-
-            eventTitle.value = "";
-
-            eventSubject.value = "";
-
-            eventTime.value = "";
-
-            eventDescription.value = "";
+    
+            prepararNuevoEvento();
 
             fechaSeleccionada = fechaFormateada;
-
             eventDate.value = fechaSeleccionada;
+            eventEndDate.value = fechaSeleccionada;
 
-            formError.classList.remove("show");
-
-            eventModal.classList.add("show");
 
         });
 
@@ -1398,21 +1484,12 @@ function mostrarDia() {
 
     day.addEventListener("click", () => {
 
-        editandoEvento = false;
-
-        eventoSeleccionado = null;
-
-        eventTitle.value = "";
-        eventSubject.value = "";
-        eventTime.value = "";
-        eventDescription.value = "";
+        prepararNuevoEvento();
 
         fechaSeleccionada = fechaFormateada;
         eventDate.value = fechaSeleccionada;
+        eventEndDate.value = fechaSeleccionada;
 
-        formError.classList.remove("show");
-
-        eventModal.classList.add("show");
 
     });
 
@@ -1613,6 +1690,9 @@ editEvent.addEventListener("click", () => {
 
     eventSubject.value =
         eventoSeleccionado.asignatura || "";
+    
+    eventColor.value =
+        eventoSeleccionado.color || "#60A561";
 
     eventCalendar.value =
         eventoSeleccionado.calendario || "";
