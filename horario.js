@@ -193,92 +193,71 @@ function renderScheduleEvents() {
 
         if (event.repeat) {
 
-            const repeatDays =
-                event.repeat_days || [];
+        const repeatDays =
+            event.repeat_days || [];
 
+        const startDate =
+            new Date(
+                event.start_date + "T00:00:00"
+            );
 
-            // Fecha de inicio del evento
-            const startDate =
-                new Date(
-                    event.start_date + "T00:00:00"
-                );
+        /*
+        El evento repetitivo empieza
+        a partir de esta fecha.
 
+        No usamos end_date porque
+        los eventos repetitivos del horario
+        son indefinidos.
+        */
 
-            // Fecha de finalización del evento
-            const endDate =
-                new Date(
-                    event.end_date + "T00:00:00"
-                );
-
-
-            /*
-            Si el evento todavía no ha empezado
-            en esta semana, no lo mostramos.
-            */
-
-            if (endDate < monday) {
-                return;
-            }
-
-
-            /*
-            Si el evento ya terminó antes
-            de esta semana, no lo mostramos.
-            */
-
-            if (startDate > sunday) {
-                return;
-            }
-
-
-            /*
-            Recorremos los 7 días de la semana
-            que estamos viendo.
-            */
-
-            for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
-
-                const currentDate =
-                    new Date(monday);
-
-                currentDate.setDate(
-                    currentDate.getDate() + dayIndex
-                );
-
-
-                /*
-                Comprobamos que este día esté
-                dentro del periodo del evento.
-                */
-
-                if (
-                    currentDate < startDate ||
-                    currentDate > endDate
-                ) {
-                    continue;
-                }
-
-
-                /*
-                ¿Es uno de los días en los que
-                se repite el evento?
-                */
-
-                if (
-                    repeatDays.includes(dayIndex)
-                ) {
-
-                    renderEventInSchedule(
-                        event,
-                        dayIndex
-                    );
-
-                }
-
-            }
-
+        if (sunday < startDate) {
             return;
         }
+
+
+        /*
+        Recorremos los 7 días de la semana
+        que estamos viendo.
+        */
+
+        for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+
+            const currentDate =
+                new Date(monday);
+
+            currentDate.setDate(
+                currentDate.getDate() + dayIndex
+            );
+
+
+            /*
+            No mostrar el evento antes
+            de su fecha de inicio.
+            */
+
+            if (currentDate < startDate) {
+                continue;
+            }
+
+
+            /*
+            Comprobamos si este día
+            está seleccionado para repetir.
+            */
+
+            if (repeatDays.includes(dayIndex)) {
+
+                renderEventInSchedule(
+                    event,
+                    dayIndex
+                );
+
+            }
+
+        }
+
+        return;
+    }
 
 
         /*
@@ -774,6 +753,8 @@ function openScheduleModal(dayIndex, hour, event = null) {
         repeatCheckbox.checked = false;
 
         repeatDaysGroup.style.display = "none";
+
+        updateRepeatDateState();
 
         subjectInput.value = "";
 
