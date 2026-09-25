@@ -810,26 +810,13 @@ scheduleRepeat.addEventListener("change", () => {
     updateRepeatDateState();
 });
 
+
 function updateRepeatDateState() {
     const isRepeating = scheduleRepeat.checked;
 
-    scheduleEndDate.disabled = isRepeating;
-
-    if (isRepeating) {
-        scheduleEndDate.value = scheduleStartDate.value;
-    }
+    scheduleEndDate.disabled = false;
 }
 
-scheduleStartDate.addEventListener("change", () => {
-
-    if (scheduleRepeat.checked) {
-
-        scheduleEndDate.value =
-            scheduleStartDate.value;
-
-    }
-
-});
 
 
 
