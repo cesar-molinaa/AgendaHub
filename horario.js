@@ -191,73 +191,89 @@ function renderScheduleEvents() {
         ==========================================
         */
 
-        if (event.repeat) {
+if (event.repeat) {
 
-        const repeatDays =
-            event.repeat_days || [];
+    const repeatDays =
+        event.repeat_days || [];
 
-        const startDate =
-            new Date(
-                event.start_date + "T00:00:00"
-            );
+    const startDate =
+        new Date(
+            event.start_date + "T00:00:00"
+        );
 
-        /*
-        El evento repetitivo empieza
-        a partir de esta fecha.
-
-        No usamos end_date porque
-        los eventos repetitivos del horario
-        son indefinidos.
-        */
-
-        if (sunday < startDate) {
-            return;
-        }
+    const endDate =
+        new Date(
+            event.end_date + "T00:00:00"
+        );
 
 
-        /*
-        Recorremos los 7 días de la semana
-        que estamos viendo.
-        */
+    /*
+    Si la semana que estamos viendo
+    está completamente antes del inicio
+    o completamente después del final,
+    no mostramos el evento.
+    */
 
-        for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
-
-            const currentDate =
-                new Date(monday);
-
-            currentDate.setDate(
-                currentDate.getDate() + dayIndex
-            );
-
-
-            /*
-            No mostrar el evento antes
-            de su fecha de inicio.
-            */
-
-            if (currentDate < startDate) {
-                continue;
-            }
-
-
-            /*
-            Comprobamos si este día
-            está seleccionado para repetir.
-            */
-
-            if (repeatDays.includes(dayIndex)) {
-
-                renderEventInSchedule(
-                    event,
-                    dayIndex
-                );
-
-            }
-
-        }
-
+    if (
+        sunday < startDate ||
+        monday > endDate
+    ) {
         return;
     }
+
+
+    /*
+    Recorremos los 7 días de la semana.
+    */
+
+    for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+
+        const currentDate =
+            new Date(monday);
+
+        currentDate.setDate(
+            currentDate.getDate() + dayIndex
+        );
+
+
+        /*
+        No mostrar el evento antes
+        de su fecha de inicio.
+        */
+
+        if (currentDate < startDate) {
+            continue;
+        }
+
+
+        /*
+        No mostrar el evento después
+        de su fecha de finalización.
+        */
+
+        if (currentDate > endDate) {
+            continue;
+        }
+
+
+        /*
+        Comprobamos si este día
+        está seleccionado para repetir.
+        */
+
+        if (repeatDays.includes(dayIndex)) {
+
+            renderEventInSchedule(
+                event,
+                dayIndex
+            );
+
+        }
+
+    }
+
+    return;
+}
 
 
         /*
