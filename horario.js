@@ -477,6 +477,8 @@ function createScheduleEventPart(
         eventElement.style.fontSize = "10px";
         eventElement.style.padding = "1px 4px";
         eventElement.style.fontWeight = "500";
+        eventElement.style.display ="flex";
+        eventElement.style.alignItems ="center";
     }
 
     if (duration <= 15) {
