@@ -1653,6 +1653,29 @@ header .main h1{
     font-size: 1.05rem;
 }
 
+
+.task-main {
+    flex: 1;
+    min-width: 0;
+}
+
+
+.task-main h3 {
+    margin: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+
+.task-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-shrink: 0;
+    margin-left: 1rem;
+}
+
 .task-date {
     font-size: .9rem;
     font-weight: 600;
@@ -3847,6 +3870,9 @@ background-color: #FCB55F;
     filter: brightness(85%);
 }
 
+.schedule-cell.current-time-cell {
+    filter: brightness(85%);
+}
 
 .schedule-form .schedule-info{
     display: flex;
@@ -3859,7 +3885,7 @@ background-color: #FCB55F;
 
 
 .today-header {
-    background-color: #eaa34c !important;
+    background-color: #c3853a !important;
     color: #191923;
 }
 

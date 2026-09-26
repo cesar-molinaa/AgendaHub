@@ -500,6 +500,19 @@ function createScheduleEventPart(
         }
     );
 
+    eventElement.addEventListener("mouseenter", () => {
+
+        cell.classList.add("schedule-cell-hover");
+
+    });
+
+
+    eventElement.addEventListener("mouseleave", () => {
+
+        cell.classList.remove("schedule-cell-hover");
+
+    });
+
 
     cell.appendChild(eventElement);
 }
@@ -574,7 +587,32 @@ function createSchedule() {
     scheduleGrid.appendChild(body);
 };
 
+function updateCurrentTimeCell() {
 
+    // Quitamos la marca anterior
+    document.querySelectorAll(".schedule-cell").forEach(cell => {
+        cell.classList.remove("current-time-cell");
+    });
+
+    // Si estamos viendo otra semana, no marcamos ninguna casilla
+    if (currentWeekOffset !== 0) {
+        return;
+    }
+
+    const now = new Date();
+
+    const todayIndex = (now.getDay() + 6) % 7;
+
+    const currentHour = now.getHours();
+
+    const currentCell = document.querySelector(
+        `.schedule-cell[data-day="${todayIndex}"][data-hour="${currentHour}"]`
+    );
+
+    if (currentCell) {
+        currentCell.classList.add("current-time-cell");
+    }
+}
 
 //ABRIR MODAL DE CREAR EVENTO
 
@@ -1495,6 +1533,8 @@ previousWeek.addEventListener("click", () => {
     renderScheduleEvents();
     updateTodayHeader();
 
+    updateCurrentTimeCell();
+
 });
 
 
@@ -1506,6 +1546,8 @@ nextWeek.addEventListener("click", () => {
     renderScheduleEvents();
     updateTodayHeader();
 
+    updateCurrentTimeCell();
+
 });
 
 
@@ -1516,6 +1558,8 @@ today.addEventListener("click", () => {
     updateWeekRange();
     renderScheduleEvents();
     updateTodayHeader();
+
+    updateCurrentTimeCell();
 
 });
 
@@ -1554,3 +1598,8 @@ loadScheduleCalendars();
 loadScheduleSubjects();
 updateWeekRange();
 updateTodayHeader();
+
+
+updateCurrentTimeCell();
+
+setInterval(updateCurrentTimeCell, 60000);
