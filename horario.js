@@ -30,6 +30,10 @@ let scheduleEvents = [];
 let currentWeekOffset = 0;
 let editingScheduleEvent = null;
 
+let editingScheduleOccurrenceDate = null;
+let editingScheduleMode = "all";
+let scheduleExceptions = [];
+
 
 
 const scheduleCalendar =
@@ -149,8 +153,62 @@ async function loadScheduleEvents() {
 
     scheduleEvents = data || [];
 
+    await loadScheduleExceptions();
+
     renderScheduleEvents();
 }
+
+
+async function loadScheduleExceptions() {
+
+    const { data, error } = await supabaseClient
+        .from("event_exceptions")
+        .select("*");
+
+    if (error) {
+
+        console.error(
+            "Error cargando las excepciones:",
+            error
+        );
+
+        return;
+    }
+
+    scheduleExceptions = data || [];
+}
+
+function formatOccurrenceDate(date) {
+
+    const year = date.getFullYear();
+
+    const month = String(
+        date.getMonth() + 1
+    ).padStart(2, "0");
+
+    const day = String(
+        date.getDate()
+    ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
+function getScheduleException(event, occurrenceDate) {
+
+    if (!event.repeat || !occurrenceDate) {
+        return null;
+    }
+
+    const dateKey =
+        formatOccurrenceDate(occurrenceDate);
+
+    return scheduleExceptions.find(exception =>
+        exception.event_id === event.id &&
+        exception.occurrence_date === dateKey
+    ) || null;
+}
+
+
 
 
 function parseTime(time) {
@@ -263,9 +321,38 @@ if (event.repeat) {
 
         if (repeatDays.includes(dayIndex)) {
 
+            const exception =
+                getScheduleException(event, currentDate);
+
+            if (exception && exception.deleted) {
+                continue;
+            }
+
+            const eventForOccurrence =
+                exception
+                    ? {
+                        ...event,
+                        ...Object.fromEntries(
+                            Object.entries(exception)
+                                .filter(([key, value]) =>
+                                    ![
+                                        "id",
+                                        "event_id",
+                                        "occurrence_date",
+                                        "user_id",
+                                        "created_at",
+                                        "deleted"
+                                    ].includes(key) &&
+                                    value !== null
+                                )
+                        )
+                    }
+                    : event;
+
             renderEventInSchedule(
-                event,
-                dayIndex
+                eventForOccurrence,
+                dayIndex,
+                currentDate
             );
 
         }
@@ -306,13 +393,14 @@ if (event.repeat) {
 
         renderEventInSchedule(
             event,
-            dayIndex
+            dayIndex,
+            eventDate
         );
 
     });
 }
 
-function renderEventInSchedule(event, dayIndex) {
+function renderEventInSchedule(event, dayIndex, occurrenceDate) {
 
     if (!event.start_time || !event.end_time) return;
 
@@ -378,6 +466,9 @@ function renderEventInSchedule(event, dayIndex) {
     let currentStart =
         startMinutes;
 
+    let currentOccurrenceDate =
+        new Date(occurrenceDate);
+
     while (remaining > 0) {
 
         // Minutos que quedan disponibles hasta las 00:00
@@ -394,15 +485,22 @@ function renderEventInSchedule(event, dayIndex) {
             event,
             currentDay,
             currentStart,
-            currentStart + partDuration
+            currentStart + partDuration,
+            currentOccurrenceDate
         );
 
         remaining -= partDuration;
 
-        currentDay =
-            (currentDay + 1) % 7;
+    if (remaining > 0) {
+        currentDay = (currentDay + 1) % 7;
 
         currentStart = 0;
+
+    } else {
+        currentStart += partDuration;
+    }
+
+
     }
 }
 
@@ -413,7 +511,8 @@ function createScheduleEventPart(
     event,
     day,
     startTotal,
-    endTotal
+    endTotal,
+    occurrenceDate
 ) {
 
     // Si no hay duración, no dibujamos nada.
@@ -452,8 +551,15 @@ function createScheduleEventPart(
     // POSICIÓN VERTICAL
     // ==========================================
 
-    const cellHeight =
-        cell.offsetHeight;
+    const cellRect = cell.getBoundingClientRect();
+
+    const nextCell = document.querySelector(
+        `.schedule-cell[data-day="${day}"][data-hour="${startHour + 1}"]`
+    );
+
+    const cellHeight = nextCell
+        ? nextCell.getBoundingClientRect().top - cellRect.top
+        : cellRect.height;
 
     const minutesInsideHour =
         startTotal % 60;
@@ -495,7 +601,7 @@ function createScheduleEventPart(
 
             e.stopPropagation();
 
-            openScheduleInfo(event);
+            openScheduleInfo(event, occurrenceDate);
 
         }
     );
@@ -681,56 +787,110 @@ function openScheduleModal(dayIndex, hour, event = null) {
 
     if (event) {
 
+
         editingScheduleEvent = event;
 
         formTitle.textContent = "Editar evento";
 
+        let eventToEdit = event;
+
+
+
+
+        if (
+            editingScheduleMode === "single" &&
+            editingScheduleOccurrenceDate
+        ) {
+            const exception =
+                getScheduleException(
+                    event,
+                    editingScheduleOccurrenceDate
+                );
+
+            if (exception) {
+                eventToEdit = {
+                    ...event,
+                    ...exception
+                };
+            }
+
+            // En "solo esta repetición" no se puede cambiar
+            // la configuración de repetición.
+            scheduleStartDate.disabled = true;
+            scheduleEndDate.disabled = true;
+            scheduleRepeat.disabled = true;
+
+            document
+                .querySelectorAll(".event-repeat-day")
+                .forEach(checkbox => {
+                    checkbox.disabled = true;
+                });
+
+        } else {
+
+            // Editar todas las repeticiones
+            scheduleStartDate.disabled = false;
+            scheduleEndDate.disabled = false;
+            scheduleRepeat.disabled = false;
+
+            document
+                .querySelectorAll(".event-repeat-day")
+                .forEach(checkbox => {
+                    checkbox.disabled = false;
+                });
+        }
+
+
+
+
+
         titleInput.value =
-            event.title || "";
+            eventToEdit.title || "";
+
 
         subjectInput.value =
-            event.subject_id || "";
+            eventToEdit.subject_id || "";
 
         colorInput.value =
-            event.color || "#60A561";
+            eventToEdit.color || "#60A561";
 
         calendarInput.value =
-            event.calendar_id || "";
+            eventToEdit.calendar_id || "";
 
         startDayInput.value =
-            event.start_date || "";
+            eventToEdit.start_date || "";
 
         endDayInput.value =
-            event.end_date || "";
+            eventToEdit.end_date || "";
 
         startInput.value =
-            event.start_time
-                ? event.start_time.slice(0, 5)
+            eventToEdit.start_time
+                ? eventToEdit.start_time.slice(0, 5)
                 : "";
 
         endInput.value =
-            event.end_time
-                ? event.end_time.slice(0, 5)
+            eventToEdit.end_time
+                ? eventToEdit.end_time.slice(0, 5)
                 : "";
 
         descriptionInput.value =
-            event.description || "";
+            eventToEdit.description || "";
 
         repeatCheckbox.checked =
-            event.repeat || false;
+            eventToEdit.repeat || false;
         
         updateRepeatDateState();
 
         showInCalendarInput.checked =
-            event.show_in_calendar !== false;
+            eventToEdit.show_in_calendar !== false;
 
 
-        if (event.repeat) {
+        if (eventToEdit.repeat) {
 
             repeatDaysGroup.style.display = "block";
 
             const repeatDays =
-                event.repeat_days || [];
+                eventToEdit.repeat_days || [];
 
             document
                 .querySelectorAll(".event-repeat-day")
@@ -759,6 +919,7 @@ function openScheduleModal(dayIndex, hour, event = null) {
     else {
 
         editingScheduleEvent = null;
+        editingScheduleOccurrenceDate = null;
 
         formTitle.textContent = "Nuevo evento";
 
@@ -1080,7 +1241,102 @@ saveSchedule.addEventListener("click", async () => {
     // EDITAR EVENTO
     // ==========================================
 
-    if (editingScheduleEvent) {
+    if (
+        editingScheduleEvent &&
+        editingScheduleMode === "single"
+    ) {
+
+        if (!editingScheduleOccurrenceDate) {
+
+            formError.textContent =
+                "No se ha podido identificar la repetición.";
+
+            formError.classList.add("show");
+
+            return;
+        }
+
+        const occurrenceDate =
+            formatOccurrenceDate(
+                editingScheduleOccurrenceDate
+            );
+
+        const {
+            data: userData,
+            error: userError
+        } = await supabaseClient.auth.getUser();
+
+        if (userError || !userData.user) {
+
+            formError.textContent =
+                "No se ha podido identificar al usuario.";
+
+            formError.classList.add("show");
+
+            return;
+        }
+
+        const exceptionData = {
+
+            event_id:
+                editingScheduleEvent.id,
+
+            user_id:
+                userData.user.id,
+
+            occurrence_date:
+                occurrenceDate,
+
+            title:
+                title,
+
+            subject_id:
+                subjectId,
+
+            color:
+                color,
+
+            start_time:
+                start,
+
+            end_time:
+                end,
+
+            description:
+                description || null,
+
+            calendar_id:
+                calendarId,
+
+            show_in_calendar:
+                showInCalendar,
+
+            deleted:
+                false
+
+        };
+
+        const result =
+            await supabaseClient
+                .from("event_exceptions")
+                .upsert(
+                    exceptionData,
+                    {
+                        onConflict:
+                            "event_id,occurrence_date"
+                    }
+                )
+                .select()
+                .single();
+
+        data = result.data;
+        error = result.error;
+
+    }
+    else if (
+        editingScheduleEvent &&
+        editingScheduleMode === "all"
+    ) {
 
         const result =
             await supabaseClient
@@ -1092,7 +1348,6 @@ saveSchedule.addEventListener("click", async () => {
 
         data = result.data;
         error = result.error;
-
     }
 
 
@@ -1159,7 +1414,33 @@ saveSchedule.addEventListener("click", async () => {
     // ACTUALIZAR HORARIO
     // ==============================
 
-    if (editingScheduleEvent) {
+    if (
+        editingScheduleEvent &&
+        editingScheduleMode === "single"
+    ) {
+
+        const exceptionIndex =
+            scheduleExceptions.findIndex(
+                exception =>
+                    exception.event_id === editingScheduleEvent.id &&
+                    exception.occurrence_date ===
+                        formatOccurrenceDate(
+                            editingScheduleOccurrenceDate
+                        )
+            );
+
+        if (exceptionIndex !== -1) {
+
+            scheduleExceptions[exceptionIndex] =
+                data;
+
+        } else {
+
+            scheduleExceptions.push(data);
+
+        }
+
+    } else if (editingScheduleEvent) {
 
         const index =
             scheduleEvents.findIndex(
@@ -1169,7 +1450,8 @@ saveSchedule.addEventListener("click", async () => {
 
         if (index !== -1) {
 
-            scheduleEvents[index] = data;
+            scheduleEvents[index] =
+                data;
 
         }
 
@@ -1226,6 +1508,8 @@ saveSchedule.addEventListener("click", async () => {
         });
 
     editingScheduleEvent = null;
+    editingScheduleOccurrenceDate = null;
+    editingScheduleMode = "all";
 
     // ==============================
     // VOLVER A DIBUJAR
@@ -1247,9 +1531,10 @@ saveSchedule.addEventListener("click", async () => {
 
 //ABRIR MODAL INFO EVENTO
 
-function openScheduleInfo(event) {
+function openScheduleInfo(event, occurrenceDate) {
 
     editingScheduleEvent = event;
+    editingScheduleOccurrenceDate = occurrenceDate;
 
     const modal =
         document.getElementById("scheduleInfoModal");
@@ -1268,13 +1553,27 @@ function openScheduleInfo(event) {
 
     if (event.repeat) {
 
-        const repeatDays =
-            event.repeat_days || [];
+        if (occurrenceDate) {
 
-        dayText =
-            repeatDays
-                .map(day => days[day])
-                .join(", ");
+            const jsDay =
+                occurrenceDate.getDay();
+
+            const dayIndex =
+                (jsDay + 6) % 7;
+
+            dayText =
+                days[dayIndex];
+
+        } else {
+
+            const repeatDays =
+                event.repeat_days || [];
+
+            dayText =
+                repeatDays
+                    .map(day => days[day])
+                    .join(", ");
+        }
 
     } else {
 
@@ -1361,6 +1660,11 @@ closeScheduleInfo.addEventListener("click", () => {
 const editSchedule =
     document.getElementById("editSchedule");
 
+
+
+
+
+
 editSchedule.addEventListener("click", () => {
 
     if (!editingScheduleEvent) {
@@ -1370,13 +1674,21 @@ editSchedule.addEventListener("click", () => {
     const event =
         editingScheduleEvent;
 
-    // Cerrar modal de información
     document
         .getElementById("scheduleInfoModal")
         .classList.remove("show");
 
+    if (event.repeat) {
 
-    // Abrir modal de edición
+        document
+            .getElementById("scheduleEditChoiceModal")
+            .classList.add("show");
+
+        return;
+    }
+
+    editingScheduleMode = "all";
+
     openScheduleModal(
         0,
         8,
@@ -1384,6 +1696,74 @@ editSchedule.addEventListener("click", () => {
     );
 
 });
+
+const editOnlyThis =
+    document.getElementById("editOnlyThis");
+
+const editAllEvents =
+    document.getElementById("editAllEvents");
+
+const cancelEditChoice =
+    document.getElementById("cancelEditChoice");
+
+
+editOnlyThis.addEventListener("click", async () => {
+
+    if (
+        !editingScheduleEvent ||
+        !editingScheduleOccurrenceDate
+    ) {
+        return;
+    }
+
+    editingScheduleMode = "single";
+
+    document
+        .getElementById("scheduleEditChoiceModal")
+        .classList.remove("show");
+
+    openScheduleModal(
+        0,
+        8,
+        editingScheduleEvent
+    );
+
+});
+
+
+editAllEvents.addEventListener("click", () => {
+
+    if (!editingScheduleEvent) {
+        return;
+    }
+
+    editingScheduleMode = "all";
+
+    document
+        .getElementById("scheduleEditChoiceModal")
+        .classList.remove("show");
+
+    openScheduleModal(
+        0,
+        8,
+        editingScheduleEvent
+    );
+
+});
+
+
+cancelEditChoice.addEventListener("click", () => {
+
+    document
+        .getElementById("scheduleEditChoiceModal")
+        .classList.remove("show");
+
+});
+
+
+
+
+
 
 
 const deleteSchedule =

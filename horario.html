@@ -88,7 +88,7 @@
 
     </main>
 
-    <!-- MODAL CREAR EVENTO -->
+
 
     <div class="modal" id="scheduleModal">
 
@@ -359,7 +359,6 @@
     </div>
 
 
-    <!-- MODAL INFORMACIÓN DEL EVENTO -->
 
     <div id="scheduleInfoModal" class="modal">
 
@@ -405,6 +404,37 @@
         </div>
 
     </div>
+
+
+    <div id="scheduleEditChoiceModal" class="modal">
+
+            <div class="schedule-form">
+
+                <h2>Editar evento repetido</h2>
+
+                <p class="edit-choice-text">
+                    Este evento se repite. ¿Qué quieres modificar?
+                </p>
+
+                <div class="edit-choice-buttons">
+
+                    <button id="editOnlyThis">
+                        Solo este evento
+                    </button>
+
+                    <button id="editAllEvents">
+                        Todos los eventos
+                    </button>
+
+                </div>
+
+                <button id="cancelEditChoice">
+                    Cancelar
+                </button>
+
+            </div>
+
+        </div>
 
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

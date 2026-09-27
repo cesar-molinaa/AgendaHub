@@ -3720,6 +3720,9 @@ background-color: #FCB55F;
 
 .schedule-time {
     height: 2rem;
+    box-sizing: border-box;
+
+
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -3731,6 +3734,7 @@ background-color: #FCB55F;
     border-right: 2px solid #191923;
     border-bottom: 2px solid #191923;
 }
+
 
 
 /* CELDAS */
@@ -3963,9 +3967,40 @@ background-color: #FCB55F;
 
 }
 
+.edit-choice-text {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #191923;
+}
 
+.edit-choice-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
 
+    margin-bottom: 2rem;
+}
 
+.edit-choice-buttons button,
+#cancelEditChoice {
+    width: fit-content;
+    padding: .5rem .8rem;
+
+    background-color: #FCB55F;
+    border: 2px solid #191923;
+    box-shadow: 5px 5px 0 #191923;
+
+    font-weight: 700;
+
+    transition: .2s ease;
+}
+
+.edit-choice-buttons button:hover,
+#cancelEditChoice:hover{
+    transform: translateY(-4px);
+    box-shadow: 8px 8px 0 #191923;
+}
 
 
 
