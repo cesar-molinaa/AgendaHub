@@ -709,7 +709,15 @@ const closeInfo = document.getElementById("closeInfo");
 const editEvent = document.getElementById("editEvent");
 const deleteEvent = document.getElementById("deleteEvent");
 
+eventInfoModal.addEventListener("click", (event) => {
 
+    if (event.target === eventInfoModal) {
+
+        eventInfoModal.classList.remove("show");
+
+    }
+
+});
 
 //GUARDAR INFORMACION DE EVENTO EN LOCAL STORAGE
 
@@ -1024,6 +1032,8 @@ function mostrarCalendario() {
     calendar.classList.remove("day-view");
     calendar.classList.remove("week-view");
 
+
+
     const año = fechaCalendario.getFullYear();
     const mes = fechaCalendario.getMonth();
 
@@ -1054,6 +1064,10 @@ function mostrarCalendario() {
 
     for (let dia = 1; dia <= diasMes; dia++) {
 
+        const posicion = diaSemana + dia - 1;
+        const fila = Math.floor(posicion / 7);
+        const columna = posicion % 7;
+
         const day = document.createElement("div");
 
         day.classList.add("calendar-day");
@@ -1070,6 +1084,7 @@ function mostrarCalendario() {
 
         day.innerHTML = `
             <span>${dia}</span>
+            <div class="day-events"></div>
         `;
 
         //FECHA DE ESTE DIA
@@ -1098,115 +1113,14 @@ function mostrarCalendario() {
         });
 
 
-        //BUSCAR EVENTOS DE ESTE DÍA
-
-        const eventosDelDia = eventos
-        .filter(evento => eventoApareceEnFecha(evento, fechaFormateada))
-        .filter(evento => {
-
-            const calendario = calendarios.find(
-                calendario => calendario.id === evento.calendario
-            );
-
-            return calendario && calendario.visible;
-
-        })
-        .sort((a, b) => {
-
-            return (a.hora || "23:59")
-                .localeCompare(b.hora || "23:59");
-
-        });
- 
-
-        // MOSTRAR LOS EVENTOS
-
-        const maxEventos = 3;
-
-        eventosDelDia.slice(0, maxEventos).forEach(evento => {
-
-            const eventElement = document.createElement("div");
-
-            eventElement.classList.add("calendar-event");
-
-            eventElement.textContent = evento.titulo;
-
-            
-            if (evento.color) {
-                    eventElement.style.backgroundColor = evento.color;
-                } else {
-
-                    const subject = getSubjectById(evento.asignatura);
-
-                    if (subject) {
-                        eventElement.style.backgroundColor = subject.color;
-                    } else {
-                        eventElement.style.backgroundColor = "#FCB55F";
-                    }
-
-                }
-
-
-            eventElement.addEventListener("click", (event) => {
-
-                event.stopPropagation();
-
-                eventoSeleccionado = evento;
-
-                infoTitle.textContent = evento.titulo;
-
-                const subject = getSubjectById(evento.asignatura);
-                infoSubject.textContent = subject
-                ? subject.name
-                : "Sin asignatura";
-
-                if (evento.repetir) {
-
-                    infoDate.textContent =
-                        `Se repite: ${obtenerTextoDiasRepeticion(evento)}`;
-                    infoTime.textContent =
-                        `${evento.hora || "Sin hora"} - ${evento.horaFin || "Sin hora"}`;
-
-                } else {
-
-                    infoDate.textContent =
-                        evento.fecha;
-                    infoTime.textContent =
-                        `${evento.hora || "Sin hora"} - ${evento.horaFin || "Sin hora"}`;
-
-                }
-
-
-                infoDescription.textContent =
-                    evento.descripcion || "Sin descripción";
-
-                eventInfoModal.classList.add("show");
-
-            });
-
-
-            day.appendChild(eventElement);
-
-        });
-
-
-        // MOSTRAR "..." SI HAY MÁS EVENTOS
-
-        if (eventosDelDia.length > maxEventos) {
-
-            const moreEvents = document.createElement("div");
-
-            moreEvents.classList.add("more-events");
-
-            moreEvents.textContent = ". . .";
-
-            day.appendChild(moreEvents);
-        }
+        
 
         //AÑADE EL DÍA AL CALENDARIO
 
         calendarDays.appendChild(day);
     }
+
+    dibujarEventosMensuales();
 
 
     // NOMBRE DEL MES
@@ -1224,6 +1138,532 @@ function mostrarCalendario() {
 
 
 }
+
+function obtenerPosicionDiaCalendario(fecha) {
+
+    const año = fechaCalendario.getFullYear();
+    const mes = fechaCalendario.getMonth();
+
+    const primerDia = new Date(año, mes, 1);
+
+    let primerDiaSemana = primerDia.getDay();
+
+    primerDiaSemana =
+        primerDiaSemana === 0
+            ? 6
+            : primerDiaSemana - 1;
+
+    const diferencia =
+        Math.round(
+            (fecha - primerDia) /
+            (1000 * 60 * 60 * 24)
+        );
+
+    const posicion =
+        primerDiaSemana + diferencia;
+
+    return {
+        fila: Math.floor(posicion / 7),
+        columna: posicion % 7
+    };
+}
+
+function dibujarEventosMensuales() {
+
+    const año = fechaCalendario.getFullYear();
+    const mes = fechaCalendario.getMonth();
+
+    const primerDia = new Date(año, mes, 1);
+    const ultimoDia = new Date(año, mes + 1, 0);
+
+    const dias = Array.from(
+        calendarDays.querySelectorAll(".calendar-day")
+    );
+
+    // CAPAS PARA LOS EVENTOS DE VARIOS DÍAS
+    const eventosLayer = document.createElement("div");
+    eventosLayer.classList.add("calendar-events-layer");
+    calendarDays.appendChild(eventosLayer);
+
+
+    // GUARDAR CUÁNTAS BARRAS DE VARIOS DÍAS
+    // OCUPAN CADA CASILLA
+    const carrilesPorDia = {};
+    const eventosOcultosPorDia = {};
+
+    dias.forEach((day, index) => {
+        carrilesPorDia[index] = 0;
+        eventosOcultosPorDia[index] = new Set();
+    });
+
+
+    // EVENTOS DE VARIOS DÍAS
+    const eventosVariosDias = eventos
+        .filter(evento => {
+
+            const calendario = calendarios.find(
+                calendario => calendario.id === evento.calendario
+            );
+
+            if (
+                !calendario ||
+                !calendario.visible ||
+                evento.repetir
+            ) {
+                return false;
+            }
+
+            const fechaInicio = new Date(
+                evento.fecha + "T00:00:00"
+            );
+
+            const fechaFin = new Date(
+                (evento.fechaFin || evento.fecha) + "T00:00:00"
+            );
+
+            return (
+                fechaFin > fechaInicio &&
+                fechaFin >= primerDia &&
+                fechaInicio <= ultimoDia
+            );
+        })
+        .sort((a, b) =>
+            a.fecha.localeCompare(b.fecha)
+        );
+
+
+    // CARRILES DE CADA FILA
+    const carrilesPorFila = {};
+
+
+    eventosVariosDias.forEach(evento => {
+
+        const fechaInicio = new Date(
+            evento.fecha + "T00:00:00"
+        );
+
+        const fechaFin = new Date(
+            (evento.fechaFin || evento.fecha) + "T00:00:00"
+        );
+
+        const inicioVisible =
+            fechaInicio < primerDia
+                ? primerDia
+                : fechaInicio;
+
+        const finVisible =
+            fechaFin > ultimoDia
+                ? ultimoDia
+                : fechaFin;
+
+        const posicionInicio =
+            obtenerPosicionDiaCalendario(
+                inicioVisible
+            );
+
+        const posicionFin =
+            obtenerPosicionDiaCalendario(
+                finVisible
+            );
+
+
+        for (
+            let fila = posicionInicio.fila;
+            fila <= posicionFin.fila;
+            fila++
+        ) {
+
+            const columnaInicio =
+                fila === posicionInicio.fila
+                    ? posicionInicio.columna
+                    : 0;
+
+            const columnaFin =
+                fila === posicionFin.fila
+                    ? posicionFin.columna
+                    : 6;
+
+
+            if (!carrilesPorFila[fila]) {
+                carrilesPorFila[fila] = [];
+            }
+
+
+            let carrilEncontrado = -1;
+
+            // BUSCAR UN CARRIL LIBRE
+            for (let carril = 0; carril < 2; carril++) {
+
+                if (!carrilesPorFila[fila][carril]) {
+                    carrilEncontrado = carril;
+                    break;
+                }
+
+                const ocupado =
+                    carrilesPorFila[fila][carril].some(segmento => {
+
+                        return !(
+                            columnaFin < segmento.columnaInicio ||
+                            columnaInicio > segmento.columnaFin
+                        );
+
+                    });
+
+                if (!ocupado) {
+                    carrilEncontrado = carril;
+                    break;
+                }
+            }
+
+
+            // NO HAY SITIO
+            if (carrilEncontrado === -1) {
+
+                for (
+                    let columna = columnaInicio;
+                    columna <= columnaFin;
+                    columna++
+                ) {
+
+                    const indiceDia =
+                        fila * 7 + columna;
+
+                    if (
+                        eventosOcultosPorDia[indiceDia]
+                    ) {
+
+                        eventosOcultosPorDia[indiceDia].add(
+                            evento.id
+                        );
+                    }
+                }
+
+                continue;
+            }
+
+
+            // GUARDAR EL CARRIL
+            carrilesPorFila[fila][carrilEncontrado] =
+                carrilesPorFila[fila][carrilEncontrado] || [];
+
+            carrilesPorFila[fila][carrilEncontrado].push({
+                columnaInicio,
+                columnaFin
+            });
+
+
+            // INDICAR CUÁNTOS CARRILES USA CADA DÍA
+            for (
+                let columna = columnaInicio;
+                columna <= columnaFin;
+                columna++
+            ) {
+
+                const indiceDia =
+                    fila * 7 + columna;
+
+                if (
+                    carrilesPorDia[indiceDia] !== undefined
+                ) {
+
+                    carrilesPorDia[indiceDia] =
+                        Math.max(
+                            carrilesPorDia[indiceDia],
+                            carrilEncontrado + 1
+                        );
+                }
+            }
+
+
+            // CREAR LA BARRA
+            const eventElement =
+                document.createElement("div");
+
+            eventElement.classList.add(
+                "calendar-event"
+            );
+
+            eventElement.textContent =
+                evento.titulo;
+
+            eventElement.style.backgroundColor =
+                evento.color || "#60A561";
+
+            eventElement.style.position =
+                "absolute";
+
+            eventElement.style.left =
+                `calc(${(columnaInicio / 7) * 100}% + .7rem)`;
+
+            eventElement.style.width =
+                `calc(${((columnaFin - columnaInicio + 1) / 7) * 100}% - 1.4rem)`;
+
+            eventElement.style.top =
+                `${fila * 8 + 2.8 + carrilEncontrado * 1.2}rem`;
+
+
+            // CLICK EN EL EVENTO
+            eventElement.addEventListener(
+                "click",
+                (event) => {
+
+                    event.stopPropagation();
+
+                    eventoSeleccionado = evento;
+
+                    infoTitle.textContent =
+                        evento.titulo;
+
+                    const subject =
+                        getSubjectById(
+                            evento.asignatura
+                        );
+
+                    infoSubject.textContent =
+                        subject
+                            ? subject.name
+                            : "Sin asignatura";
+
+                    infoDate.textContent =
+                        evento.fecha;
+
+                    infoTime.textContent =
+                        `${evento.hora || "Sin hora"} - ${evento.horaFin || "Sin hora"}`;
+
+                    infoDescription.textContent =
+                        evento.descripcion ||
+                        "Sin descripción";
+
+                    eventInfoModal.classList.add(
+                        "show"
+                    );
+                }
+            );
+
+
+            eventosLayer.appendChild(
+                eventElement
+            );
+        }
+    });
+
+
+    // EVENTOS NORMALES Y REPETITIVOS
+    dias.forEach((day, indiceDia) => {
+
+        const dayEvents =
+            day.querySelector(".day-events");
+
+        if (!dayEvents) {
+            return;
+        }
+
+
+        const posicion =
+            indiceDia;
+
+        const fila =
+            Math.floor(posicion / 7);
+
+        const columna =
+            posicion % 7;
+
+
+        const fecha = new Date(
+            año,
+            mes,
+            posicion -
+            (obtenerPosicionDiaCalendario(primerDia).columna) +
+            1
+        );
+
+        if (
+            fecha.getMonth() !== mes
+        ) {
+            dayEvents.innerHTML = "";
+            return;
+        }
+
+
+        const fechaFormateada =
+            `${año}-${String(mes + 1).padStart(2, "0")}-${String(fecha.getDate()).padStart(2, "0")}`;
+
+
+        const eventosDelDia =
+            eventos
+                .filter(evento =>
+                    eventoApareceEnFecha(
+                        evento,
+                        fechaFormateada
+                    )
+                )
+                .filter(evento => {
+
+                    const calendario =
+                        calendarios.find(
+                            calendario =>
+                                calendario.id === evento.calendario
+                        );
+
+                    if (
+                        !calendario ||
+                        !calendario.visible
+                    ) {
+                        return false;
+                    }
+
+                    // LOS DE VARIOS DÍAS
+                    // YA ESTÁN EN LA CAPA
+                    if (
+                        !evento.repetir &&
+                        evento.fechaFin &&
+                        evento.fechaFin > evento.fecha
+                    ) {
+                        return false;
+                    }
+
+                    return true;
+                })
+                .sort((a, b) => {
+
+                    return (a.hora || "23:59")
+                        .localeCompare(
+                            b.hora || "23:59"
+                        );
+                });
+
+
+        // DEJAR SITIO PARA LAS BARRAS
+        const carriles =
+            carrilesPorDia[indiceDia] || 0;
+
+        dayEvents.style.top =
+            `${2.8 + carriles * 1.2}rem`;
+
+
+        // EVENTOS QUE CABEN
+        const maxEventos =
+            Math.max(1, 3 - carriles);
+
+        const visibles =
+            eventosDelDia.slice(
+                0,
+                maxEventos
+            );
+
+
+        visibles.forEach(evento => {
+
+            const eventElement =
+                document.createElement("div");
+
+            eventElement.classList.add(
+                "calendar-event"
+            );
+
+            eventElement.textContent =
+                evento.titulo;
+
+            eventElement.style.backgroundColor =
+                evento.color || "#60A561";
+
+
+            eventElement.addEventListener(
+                "click",
+                (event) => {
+
+                    event.stopPropagation();
+
+                    eventoSeleccionado =
+                        evento;
+
+                    infoTitle.textContent =
+                        evento.titulo;
+
+                    const subject =
+                        getSubjectById(
+                            evento.asignatura
+                        );
+
+                    infoSubject.textContent =
+                        subject
+                            ? subject.name
+                            : "Sin asignatura";
+
+                    if (evento.repetir) {
+
+                        infoDate.textContent =
+                            `Se repite: ${obtenerTextoDiasRepeticion(evento)}`;
+
+                    } else {
+
+                        infoDate.textContent =
+                            evento.fecha;
+                    }
+
+                    infoTime.textContent =
+                        `${evento.hora || "Sin hora"} - ${evento.horaFin || "Sin hora"}`;
+
+                    infoDescription.textContent =
+                        evento.descripcion ||
+                        "Sin descripción";
+
+                    eventInfoModal.classList.add(
+                        "show"
+                    );
+                }
+            );
+
+
+            dayEvents.appendChild(
+                eventElement
+            );
+        });
+
+
+        // CONTAR EVENTOS NORMALES QUE NO CABEN
+        const ocultosNormales =
+            Math.max(
+                0,
+                eventosDelDia.length -
+                visibles.length
+            );
+
+
+        const ocultosVariosDias =
+            eventosOcultosPorDia[indiceDia]
+                ? eventosOcultosPorDia[indiceDia].size
+                : 0;
+
+
+        const totalOcultos =
+            ocultosNormales +
+            ocultosVariosDias;
+
+
+        if (totalOcultos > 0) {
+
+            const more =
+                document.createElement("div");
+
+            more.classList.add(
+                "more-events"
+            );
+
+            more.textContent =
+                `+${totalOcultos} más`;
+
+            dayEvents.appendChild(
+                more
+            );
+        }
+
+    });
+}
+
+
+
+
 
 
 //FUNCIÓN QUE SE ENCARGA DE CALCULAR Y DISEÑAR LA SEMANA CORRESPONDIENTE

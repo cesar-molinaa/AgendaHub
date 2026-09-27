@@ -1050,12 +1050,20 @@ header .main h1{
 }
 
 .calendar-days {
+    position: relative;
+
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
-    grid-template-rows: repeat(5, 8rem);
+    grid-auto-rows: 8rem;
 }
 
+
+
+
 .calendar-day {
+
+    position: relative;
+    overflow: hidden;
     height: 8rem;
     min-height: 0;
 
@@ -1068,6 +1076,7 @@ header .main h1{
 
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     gap: .4rem;
 
     transition: .2s ease;
@@ -1077,18 +1086,16 @@ header .main h1{
     background-color: #fff;
 }
 
-.calendar-day:nth-child(7n) {
-    border-right: none;
-}
-
 
 .calendar-day.today > span {
+    position: relative;
+
     display: flex;
     align-items: center;
     justify-content: center;
 
-    width: 2rem;
-    height: 2rem;
+    width: 1.8rem;
+    height: 1.8rem;
 
     background-color: #FCB55F;
 
@@ -1096,6 +1103,7 @@ header .main h1{
     box-shadow: 2px 2px 0 #191923;
 
     font-weight: 700;
+    font-size: .8rem;
 }
 
 .more-events {
@@ -1125,8 +1133,35 @@ header .main h1{
 
 
 .calendar-event:hover{
-    transform: scale(.95);
+    filter: brightness(85%);
 }
+
+.day-events {
+    position: absolute;
+
+    left: .7rem;
+    right: .7rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+
+    z-index: 3;
+}
+
+.calendar-events-layer {
+    position: absolute;
+    inset: 0;
+
+    pointer-events: none;
+
+    z-index: 2;
+}
+
+.calendar-events-layer .calendar-event {
+    pointer-events: auto;
+}
+
 
 
 .day-view .calendar-event{

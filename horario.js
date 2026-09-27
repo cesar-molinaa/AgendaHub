@@ -369,38 +369,42 @@ if (event.repeat) {
         ==========================================
         */
 
-        const eventDate =
-            new Date(
-                event.start_date + "T00:00:00"
-            );
+        const eventStartDate =
+            new Date(event.start_date + "T00:00:00");
 
+        const eventEndDate =
+            new Date(event.end_date + "T00:00:00");
 
         if (
-            eventDate < monday ||
-            eventDate > sunday
+            eventEndDate < monday ||
+            eventStartDate > sunday
         ) {
             return;
         }
 
+        const visibleStartDate =
+            eventStartDate < monday
+                ? new Date(monday)
+                : new Date(eventStartDate);
 
         const jsDay =
-            eventDate.getDay();
-
+            visibleStartDate.getDay();
 
         const dayIndex =
             (jsDay + 6) % 7;
 
-
         renderEventInSchedule(
             event,
             dayIndex,
-            eventDate
+            visibleStartDate,
+            monday,
+            sunday
         );
 
     });
 }
 
-function renderEventInSchedule(event, dayIndex, occurrenceDate) {
+function renderEventInSchedule(event, dayIndex, occurrenceDate, weekStart = null, weekEnd = null) {
 
     if (!event.start_time || !event.end_time) return;
 
@@ -418,8 +422,6 @@ function renderEventInSchedule(event, dayIndex, occurrenceDate) {
     
     let duration;
 
-    // Los eventos repetitivos duran lo indicado
-    // por sus horas en cada repetición.
     if (event.repeat) {
 
         duration =
@@ -427,26 +429,47 @@ function renderEventInSchedule(event, dayIndex, occurrenceDate) {
 
     } else {
 
-        // Los eventos normales sí pueden ocupar
-        // varios días.
-
         const startDate =
             new Date(event.start_date + "T00:00:00");
 
         const endDate =
             new Date(event.end_date + "T00:00:00");
 
+        const visibleStart =
+            weekStart && startDate < weekStart
+                ? new Date(weekStart)
+                : new Date(startDate);
+
+        const visibleEnd =
+            weekEnd && endDate > weekEnd
+                ? new Date(weekEnd)
+                : new Date(endDate);
+
         const differenceMs =
-            endDate - startDate;
+            visibleEnd - visibleStart;
 
         const differenceDays =
             Math.round(
-                differenceMs / (1000 * 60 * 60 * 24)
+                differenceMs /
+                (1000 * 60 * 60 * 24)
             );
+
+        const visibleStartMinutes =
+            visibleStart.getTime() === startDate.getTime()
+                ? startMinutes
+                : 0;
+
+        const visibleEndMinutes =
+            visibleEnd.getTime() === endDate.getTime()
+                ? endMinutes
+                : 24 * 60;
 
         duration =
             differenceDays * 24 * 60 +
-            (endMinutes - startMinutes);
+            (visibleEndMinutes - visibleStartMinutes);
+
+        if (visibleStart.getTime() !== startDate.getTime()) {
+        }
     }
 
 
@@ -463,8 +486,15 @@ function renderEventInSchedule(event, dayIndex, occurrenceDate) {
     let currentDay =
         dayIndex;
 
-    let currentStart =
-        startMinutes;
+    let currentStart = startMinutes;
+
+    if (
+        !event.repeat &&
+        weekStart &&
+        new Date(event.start_date + "T00:00:00") < weekStart
+    ) {
+        currentStart = 0;
+    }
 
     let currentOccurrenceDate =
         new Date(occurrenceDate);
@@ -492,12 +522,18 @@ function renderEventInSchedule(event, dayIndex, occurrenceDate) {
         remaining -= partDuration;
 
     if (remaining > 0) {
-        currentDay = (currentDay + 1) % 7;
 
+        if (currentDay === 6) {
+            break;
+        }
+
+        currentDay++;
         currentStart = 0;
 
     } else {
+
         currentStart += partDuration;
+
     }
 
 
