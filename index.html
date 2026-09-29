@@ -67,9 +67,6 @@
 
         <div class="dashboard-grid">
 
-
-            <!-- PRÓXIMAMENTE -->
-
             <section class="dashboard-card">
 
                 <div class="dashboard-card-header">
@@ -86,8 +83,6 @@
             </section>
 
 
-            <!-- TAREAS -->
-
             <section class="dashboard-card">
 
                 <div class="dashboard-card-header">
@@ -103,11 +98,166 @@
 
             </section>
 
-
         </div>
 
 
-        <!-- RENDIMIENTO -->
+        <div class="dashboard-card habits-card">
+
+            <div class="dashboard-card-header">
+
+                <h3>Hábitos de hoy</h3>
+
+                <button id="addHabit">
+                    + Crear hábito
+                </button>
+
+            </div>
+
+            <div id="dashboardHabits" class="habits-list">
+
+            </div>
+
+
+            <div class="daily-review">
+
+                <h4>¿Cómo ha ido tu día?</h4>
+
+                <div id="dailyRating" class="daily-rating">
+
+                    <button data-rating="1">&#9733;</button>
+                    <button data-rating="2">&#9733;</button>
+                    <button data-rating="3">&#9733;</button>
+                    <button data-rating="4">&#9733;</button>
+                    <button data-rating="5">&#9733;</button>
+
+                </div>
+
+                
+                <textarea 
+                id="dailyNote"
+                placeholder="Escribe cómo ha ido tu día"
+                ></textarea>
+
+                <button id="saveDailyReview">
+                    Guardar valoración
+                </button>
+
+
+            </div>
+
+            
+            <div class="habits-today-progress">
+
+                <div>
+                    <strong id="habitsCompleted">0 / 0</strong>
+                    <span>completados</span>
+                </div>
+
+                <div class="habit-progress">
+
+                    <div
+                        class="habit-progress-fill"
+                        id="habitProgressFill"
+                    
+                    ></div>
+                </div>
+            </div>
+        </div>
+        
+
+        <div class="dashboard-card habits-stats-card">
+
+            <div class="dashboard-card-header">
+
+                <h3>Estadísticas de Hábitos</h3>
+
+            </div>
+
+            <div class="habits-chart">
+                <canvas id="habitsChart"></canvas>
+            </div>
+
+            <div class="habit-stats" id="habitStats">
+
+            </div>
+
+            <div class="habit-streak">
+
+                <span>Racha -</span>
+                <strong id="habitStreak"> 0 días</strong>
+            </div>
+
+
+
+            <div class="daily-reviews-calendar">
+
+                <div class="daily-reviews-header">
+                    <button id="previousReviewYear" type="button" aria-label="Año anterior">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="m15 18-6-6 6-6"></path>
+                        </svg>
+                    </button>
+
+                    <h4 id="reviewYear"></h4>
+
+                    <button id="nextReviewYear" type="button" aria-label="Año siguiente">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="m9 18 6-6-6-6"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="reviews-calendar">
+
+                    <div class="reviews-calendar-days">
+                        <span></span>
+
+                        <span>1</span>
+                        <span>2</span>
+                        <span>3</span>
+                        <span>4</span>
+                        <span>5</span>
+                        <span>6</span>
+                        <span>7</span>
+                        <span>8</span>
+                        <span>9</span>
+                        <span>10</span>
+                        <span>11</span>
+                        <span>12</span>
+                        <span>13</span>
+                        <span>14</span>
+                        <span>15</span>
+                        <span>16</span>
+                        <span>17</span>
+                        <span>18</span>
+                        <span>19</span>
+                        <span>20</span>
+                        <span>21</span>
+                        <span>22</span>
+                        <span>23</span>
+                        <span>24</span>
+                        <span>25</span>
+                        <span>26</span>
+                        <span>27</span>
+                        <span>28</span>
+                        <span>29</span>
+                        <span>30</span>
+                        <span>31</span>
+                    </div>
+
+                    <div id="reviewsCalendarMonths"></div>
+
+                </div>
+
+                <div id="reviewDetail" class="review-detail">
+                    <p>Selecciona un día para ver su valoración.</p>
+                </div>
+
+            </div>
+
+
+        </div>
+
 
         <section class="dashboard-card performance-card">
 
@@ -153,7 +303,115 @@
 </main>
 
 
-    
+
+
+    <div class="modal" id="habitModal">
+
+        <div class="habit-form">
+
+            <h2 id="habitModalTitle">Nuevo hábito</h2>
+
+            <div class="form-group">
+
+                <label for="habitName">
+                    Nombre
+                </label>
+
+                <input
+                    type="text"
+                    id="habitName"
+                    placeholder="Ej. Leer"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="habitColor">
+                    Color
+                </label>
+
+                <input
+                    type="color"
+                    id="habitColor"
+                    value="#60A561"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Días
+                </label>
+
+                <div class="habit-days">
+
+                    <label>
+                        <input type="checkbox" value="0">
+                        L
+                    </label>
+                    <label>
+                        <input type="checkbox" value="1">
+                        M
+                    </label>
+                    <label>
+                        <input type="checkbox" value="2">
+                        X
+                    </label>
+                    <label>
+                        <input type="checkbox" value="3">
+                        J
+                    </label>
+                    <label>
+                        <input type="checkbox" value="4">
+                        V
+                    </label>
+                    <label>
+                        <input type="checkbox" value="5">
+                        S
+                    </label>
+                    <label>
+                        <input type="checkbox" value="6">
+                        D
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <p id="habitFormError" class="form-error"></p>
+
+
+            <div class="form-buttons">
+
+                <button id="deleteHabit" type="button">
+                    Eliminar hábito
+                </button>
+
+                <button id="cancelHabit" type="button">
+                    Cancelar
+                </button>
+
+                <button id="saveHabit" type="button">
+                    Crear hábito
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>

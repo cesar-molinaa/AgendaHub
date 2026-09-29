@@ -187,7 +187,20 @@ header .main h1{
 }
 
 
+.tasks-main,
+.marks-main,
+.subjects-main,
+.horario-section{
+    transition: margin-left .3s ease, padding-left .3s ease;
+}
 
+.seccion-vistas-agenda{
+    transition: padding-left .3s ease;
+}
+
+.dashboard{
+    transition: margin-left .3s ease;
+}
 
 /* ==============================
    MODALES
@@ -927,6 +940,8 @@ header .main h1{
     visibility: hidden;
     transform: translateY(-8px);
 
+    z-index: 1000;
+
     transition: .2s ease;
 }
 
@@ -1470,6 +1485,9 @@ header .main h1{
 
     background-color: white;
     border: 2px solid #191923;
+
+
+    
 }
 
 .tasks-header{
@@ -4039,6 +4057,752 @@ background-color: #FCB55F;
 
 
 
+
+
+/*MODAL DE HÁBITOS*/
+
+
+.habit-form {
+    width: min(90%, 500px);
+    max-height: 90vh;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    padding: 2rem;
+
+    box-sizing: border-box;
+
+    background-color: #fff;
+
+    border: 2px solid #191923;
+    box-shadow: 8px 8px 0 #191923;
+
+    overflow-y: auto;
+}
+
+
+.habit-form h2 {
+    margin: 0;
+
+    font-size: 1.5rem;
+    font-weight: 700;
+
+    color: #191923;
+}
+
+
+.habit-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+}
+
+
+.habit-form .form-group label {
+    font-size: .8rem;
+    font-weight: 600;
+    color: #191923;
+}
+
+
+.habit-form input[type="text"] {
+    width: 100%;
+    min-height: 2.5rem;
+
+    padding: .5rem 1rem;
+
+    box-sizing: border-box;
+
+    font-family: "Montserrat", sans-serif;
+    font-size: .8rem;
+
+    color: #191923;
+
+    background-color: #F7F3E3;
+
+    border: 2px solid #191923;
+    border-radius: 12px;
+
+    outline: none;
+
+    transition: .2s ease;
+}
+
+
+.habit-form input[type="text"]:focus {
+    box-shadow: 5px 5px 0 #FCB55F;
+}
+
+
+/* COLOR */
+
+.habit-form input[type="color"] {
+    width: 4rem;
+    height: 2.5rem;
+
+    padding: .15rem;
+
+    background-color: #F7F3E3;
+
+    border: 2px solid #191923;
+
+    cursor: pointer;
+}
+
+
+/* DÍAS */
+
+.habit-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: .5rem;
+}
+
+
+.habit-days label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 2.5rem;
+
+    background-color: #F7F3E3;
+
+    border: 2px solid #191923;
+
+    font-size: .75rem;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: .2s ease;
+}
+
+
+.habit-days label:hover {
+    transform: translateY(-2px);
+    box-shadow: 3px 3px 0 #191923;
+}
+
+
+.habit-days input[type="checkbox"] {
+    display: none;
+}
+
+
+.habit-days label:has(input[type="checkbox"]:checked) {
+    background-color: #60A561;
+    box-shadow: 3px 3px 0 #191923;
+}
+
+
+/* BOTONES */
+
+.habit-form .form-buttons {
+    margin-top: .5rem;
+}
+
+
+
+
+.habits-list {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 1rem;
+
+    margin-bottom: 2rem;
+}
+
+
+.habit-card {
+
+    min-height: 90px;
+    padding: 1rem;
+
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+
+    box-sizing: border-box;
+    border: 2px solid #191923;
+    box-shadow: 5px 5px 0 #191923;
+    cursor: pointer;
+
+    transition: .2s ease;
+
+}
+
+
+.habit-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 8px 8px 0 #191923;
+}
+
+
+
+.habit-name {
+    font-size: 1remrem;
+    font-weight: 700;
+
+}
+
+
+.habit-check {
+    width: 1.5rem;
+    height: 1.5rem;
+
+    margin-left: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    background-color: #F7F3E3;
+    border: 2px solid #191923;
+
+    font-size: .8rem;
+    font-weight: 800;
+}
+
+
+.habit-card.completed {
+    box-shadow: 7px 7px 0 #191923;
+
+}
+
+
+.habit-card.completed .habit-check {
+    background-color: #F7F3E3;
+
+}
+
+.daily-review{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.daily-rating{
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+}
+
+.daily-rating button{
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+
+    padding: 0;
+    font-size: 1.4rem;
+    cursor: pointer;
+
+    transition: .2s ease;
+}
+
+.daily-rating button.selected{
+    transform: scale(1.2);
+    color: #FCB55F !important;
+    -webkit-text-fill-color: #FCB55F !important;
+}
+
+
+.daily-review textarea {
+
+    width: 100%;
+    min-height: 100px;
+
+    padding: .7rem;
+
+    box-sizing: border-box;
+
+    resize: none;
+
+    font-family: "Montserrat", sans-serif;
+    font-size: .8rem;
+
+    color: #191923;
+
+    background-color: #F7F3E3;
+
+    border: 2px solid #191923;
+    border-radius: 12px;
+
+    outline: none;
+
+}
+
+
+
+#saveDailyReview{
+width: fit-content;
+    padding: .5rem .8rem;
+
+    background-color: #FCB55F;
+    border: 2px solid #191923;
+    box-shadow: 5px 5px 0 #191923;
+
+    font-weight: 700;
+
+    transition: .2s ease;
+}
+
+#saveDailyReview:hover{
+    transform: translateY(-4px);
+    box-shadow: 8px 8px 0 #191923;
+}
+
+
+
+#addHabit{
+    background-color: #FCB55F;
+    border: 2px solid #191923;
+    box-shadow: 5px 5px 0 #191923;
+
+    padding: .5rem .8rem;
+    font-weight: 700;
+
+    transition: .2s ease;
+}
+
+
+#addHabit:hover{
+    transform: translateY(-4px);
+    box-shadow: 8px 8px 0 #191923;
+}
+
+
+
+.habit-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+
+.habit-stat {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+}
+
+
+.habit-stat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+
+.habit-stat-header span {
+    font-size: .8rem;
+    font-weight: 700;
+}
+
+
+.habit-stat-header strong {
+    font-size: .8rem;
+}
+
+
+.habit-stat-progress {
+    width: 100%;
+    height: 1rem;
+
+    background-color: #F7F3E3;
+    border: 2px solid #191923;
+}
+
+
+.habit-stat-progress-fill {
+    height: 100%;
+
+    transition: width .3s ease;
+}
+
+
+.habit-stat-count {
+    font-size: .65rem;
+    font-weight: 600;
+}
+
+
+
+.habit-streak{
+    margin-top: 2rem;
+}
+
+
+.habits-chart {
+    width: 100%;
+    height: 300px;
+    margin-top: 1rem;
+}
+
+
+
+.habits-today-progress{
+    margin-top: 1.5rem;
+}
+
+.habit-edit {
+
+    margin-left: auto;
+    padding: .3rem;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+
+    font-size: .9rem;
+    cursor: pointer;
+
+    transition: .2s ease;
+}
+
+
+.habit-edit:hover {
+
+    transform: scale(1.2);
+}
+
+#deleteHabit {
+
+    display: none;
+    padding: .5rem .8rem;
+
+    background-color: #FCB55F;
+    color: #191923;
+
+    border: 2px solid #191923;
+    box-shadow: 5px 5px 0 #191923;
+
+    font-weight: 700;
+    cursor: pointer;
+
+    transition: .2s ease;
+}
+
+
+#deleteHabit:hover {
+
+    transform: translateY(-3px);
+
+    box-shadow: 8px 8px 0 #191923;
+}
+
+
+.habit-edit svg {
+    width: 1rem;
+    height: 1rem;
+    display: block;
+    fill: none;
+    stroke: #191923;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.habit-check svg {
+    width: 1rem;
+    height: 1rem;
+    display: block;
+    fill: none;
+    stroke: #191923;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.habit-icon svg {
+    width: 1.4rem;
+    height: 1.4rem;
+    display: block;
+    fill: none;
+    stroke: #191923;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+
+
+
+
+
+
+
+body:has(#sidebar.hide) .dashboard {
+    margin-left: 0;
+}
+
+body:has(#sidebar.hide) .tasks-main {
+    margin-left: 2rem;
+}
+
+body:has(#sidebar.hide) .marks-main {
+    margin-left: 2rem;
+}
+
+body:has(#sidebar.hide) .subjects-main {
+    margin-left: 2rem;
+}
+
+body:has(#sidebar.hide) .horario-section {
+    margin-left: 2rem;
+}
+
+body:has(#sidebar.hide) .seccion-vistas-agenda {
+    padding-left: 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+.daily-reviews-calendar {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid #191923;
+}
+
+.daily-reviews-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.daily-reviews-header h4 {
+    min-width: 5rem;
+    margin: 0;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.daily-reviews-header button {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: #FCB55F;
+    border: 2px solid #191923;
+    box-shadow: 3px 3px 0 #191923;
+
+    font-family: "Montserrat", sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.daily-reviews-header button:hover {
+    transform: translateY(-2px);
+    box-shadow: 5px 5px 0 #191923;
+}
+
+
+
+
+.reviews-calendar {
+    width: 100%;
+    overflow-x: auto;
+}
+
+
+.daily-reviews-header button svg {
+    width: 1rem;
+    height: 1rem;
+    display: block;
+    fill: none;
+    stroke: #191923;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+
+.reviews-calendar-days {
+    min-width: 700px;
+
+    display: grid;
+    grid-template-columns: 70px repeat(31, 1fr);
+    gap: .25rem;
+
+    padding-bottom: .5rem;
+
+    border-bottom: 2px solid #191923;
+}
+
+.reviews-calendar-days span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: .55rem;
+    font-weight: 600;
+}
+
+
+
+
+#reviewsCalendarMonths {
+    min-width: 700px;
+    margin-top: .5rem;
+}
+
+.review-month {
+    display: grid;
+    grid-template-columns: 70px repeat(31, 1fr);
+    gap: .25rem;
+
+    min-height: 2rem;
+}
+
+.review-month-name {
+    display: flex;
+    align-items: center;
+
+    font-size: .65rem;
+    font-weight: 700;
+}
+
+
+
+
+.review-day {
+    width: 13px;
+    height: 13px;
+
+    justify-self: center;
+    align-self: center;
+
+    padding: 0;
+
+    border: 1px solid #b8b8b8;
+    border-radius: 50%;
+
+    background-color: #e1e1e1;
+
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.review-day:hover {
+    transform: scale(1.35);
+    border-color: #191923;
+}
+
+
+
+
+.review-day.empty {
+    visibility: hidden;
+    cursor: default;
+}
+
+
+
+
+.review-day.rating-1 {
+    background-color: #d4513f;
+    border-color: #191923;
+}
+
+.review-day.rating-2 {
+    background-color: #e58b45;
+    border-color: #191923;
+}
+
+.review-day.rating-3 {
+    background-color: #e8d43a;
+    border-color: #191923;
+}
+
+.review-day.rating-4 {
+    background-color: #8fcf7d;
+    border-color: #191923;
+}
+
+.review-day.rating-5 {
+    background-color: #60A561;
+    border-color: #191923;
+}
+
+
+
+
+.review-detail {
+    margin-top: 1.5rem;
+    padding: 1rem;
+
+    background-color: #F7F3E3;
+    border: 2px solid #191923;
+    box-shadow: 5px 5px 0 #191923;
+}
+
+.review-detail p {
+    margin: 0;
+    font-size: .75rem;
+}
+
+.review-detail strong {
+    font-weight: 700;
+}
+
+.review-detail-note {
+    margin-top: .7rem !important;
+    line-height: 1.5;
+}
+
+
+#reviewYear {
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+#reviewYear:hover {
+    transform: scale(1.08);
+}
+
+#reviewYear::after {
+    font-size: .55rem;
+    font-weight: 600;
+    opacity: 0;
+    transition: .2s ease;
+}
+
+#reviewYear:hover::after {
+    opacity: .7;
+}
+
+
+
+
+
 /*MÓVIL*/
 
 @media (max-width: 768px) {
@@ -4580,3 +5344,5 @@ background-color: #FCB55F;
 
 
 }
+
+
