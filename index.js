@@ -699,7 +699,7 @@ document.getElementById("reviewYear")
 
 
 
-    
+
 const addHabit = document.getElementById("addHabit");
 const habitModal = document.getElementById("habitModal");
 const cancelHabit = document.getElementById("cancelHabit");
@@ -721,7 +721,7 @@ const saveDailyReview = document.getElementById("saveDailyReview");
 const ratingButtons =
     dailyRating.querySelectorAll("button");
 
-
+const habitsChartDiv = document.querySelector(".habits-chart");
 
 ratingButtons.forEach(button => {
 
@@ -906,6 +906,10 @@ saveDailyReview.addEventListener(
         console.log(
             "Valoración guardada correctamente."
         );
+
+        await loadHabitHistory();
+
+        renderDailyReviewsCalendar();
 
     }
 );
@@ -1572,9 +1576,14 @@ function renderHabitStats() {
             </div>
         `;
 
+        habitsChartDiv.style.display = "none";
+
+
+
         return;
     }
 
+    habitsChartDiv.style.display = "block";
 
     const hoy = new Date();
 

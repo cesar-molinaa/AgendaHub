@@ -4387,6 +4387,8 @@ width: fit-content;
     display: flex;
     flex-direction: column;
     gap: 1.2rem;
+
+    margin-top: 1rem;
 }
 
 
@@ -4440,7 +4442,7 @@ width: fit-content;
 
 
 .habit-streak{
-    margin-top: 2rem;
+    margin-top: 1rem;
 }
 
 
@@ -4782,6 +4784,7 @@ body:has(#sidebar.hide) .seccion-vistas-agenda {
 #reviewYear {
     cursor: pointer;
     transition: .2s ease;
+    font-size: 1.2rem;
 }
 
 #reviewYear:hover {
