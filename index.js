@@ -1076,6 +1076,7 @@ function renderDashboardHabits() {
     });
 
 
+
     if (habitsHoy.length === 0) {
 
         container.innerHTML = `
