@@ -1388,6 +1388,13 @@ function dibujarEventosMensuales() {
 
             eventElement.style.backgroundColor =
                 evento.color || "#60A561";
+                
+            
+            const colorFondo =
+                evento.color || "#60A561";
+
+            eventElement.style.backgroundColor = colorFondo;
+            eventElement.style.color = obtenerColorTexto(colorFondo);
 
             eventElement.style.position =
                 "absolute";
@@ -1566,6 +1573,12 @@ function dibujarEventosMensuales() {
 
             eventElement.style.backgroundColor =
                 evento.color || "#60A561";
+
+            const colorFondo =
+                evento.color || "#60A561";
+
+            eventElement.style.backgroundColor = colorFondo;
+            eventElement.style.color = obtenerColorTexto(colorFondo);
 
 
             eventElement.addEventListener(
@@ -1785,6 +1798,12 @@ function mostrarSemana() {
             
             if (evento.color) {
                 eventElement.style.backgroundColor = evento.color;
+
+                const colorFondo =
+                evento.color || "#60A561";
+
+            eventElement.style.backgroundColor = colorFondo;
+            eventElement.style.color = obtenerColorTexto(colorFondo);
             } else {
 
                 const subject = getSubjectById(evento.asignatura);
@@ -1972,6 +1991,12 @@ function mostrarDia() {
         
         if (evento.color) {
                 eventElement.style.backgroundColor = evento.color;
+
+                const colorFondo =
+                evento.color || "#60A561";
+
+            eventElement.style.backgroundColor = colorFondo;
+            eventElement.style.color = obtenerColorTexto(colorFondo);
             } else {
 
                 const subject = getSubjectById(evento.asignatura);

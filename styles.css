@@ -3605,7 +3605,7 @@ background-color: #FCB55F;
     width: 1rem;
     height: 1rem;
     fill: none;
-    stroke: #191923;
+    stroke: currentColor;
     stroke-width: 2.5;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -4326,7 +4326,8 @@ background-color: #FCB55F;
 
     box-sizing: border-box;
 
-    resize: none;
+    resize:none;
+    field-sizing: content;
 
     font-family: "Montserrat", sans-serif;
     font-size: .8rem;
@@ -4336,7 +4337,7 @@ background-color: #FCB55F;
     background-color: #F7F3E3;
 
     border: 2px solid #191923;
-    border-radius: 12px;
+    box-shadow: 5px 5px 0 #191923;
 
     outline: none;
 

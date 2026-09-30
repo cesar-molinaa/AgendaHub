@@ -579,8 +579,14 @@ function createScheduleEventPart(
     eventElement.textContent =
         event.title;
 
+    const colorFondo =
+        event.color || "#60A561";
+
     eventElement.style.backgroundColor =
-        event.color;
+        colorFondo;
+
+    eventElement.style.color =
+        obtenerColorTexto(colorFondo);
 
 
     // ==========================================

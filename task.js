@@ -24,7 +24,8 @@ async function loadTasks() {
         date: task.date,
         time: task.time,
         description: task.description,
-        status: task.status
+        status: task.status,
+        statusChangedAt: 0
     }));
 
     renderTasks();
@@ -118,7 +119,8 @@ async function createTask(title, subject, date, time, description) {
         date: data.date,
         time: data.time,
         description: data.description,
-        status: data.status
+        status: data.status,
+        statusChangedAt: Date.now()
     });
 
     return true;
@@ -320,6 +322,7 @@ function addStatusMenu(taskCard, task) {
                 }
 
                 task.status = newStatus;
+                task.statusChangedAt = Date.now();
 
                 renderTasks();
                 renderTomorrowTasks();
@@ -363,7 +366,7 @@ function renderTasks() {
     doneList.innerHTML = "";
 
     const tareasOrdenadas = [...tasks].sort((a, b) => {
-        return a.date.localeCompare(b.date);
+        return b.statusChangedAt - a.statusChangedAt;
     });
 
     const tareasHechas = tareasOrdenadas.filter(task => task.status === "done");
@@ -402,8 +405,10 @@ function renderTasks() {
 
         if (subject) {
             taskCard.style.backgroundColor = subject.color;
+            taskCard.style.color = obtenerColorTexto(subject.color);
         } else {
             taskCard.style.backgroundColor = "#F7F3E3";
+            taskCard.style.color = "#191923";
         }
 
         addStatusMenu(taskCard, task);
@@ -455,8 +460,10 @@ function renderTasks() {
 
         if (subject) {
             taskCard.style.backgroundColor = subject.color;
+            taskCard.style.color = obtenerColorTexto(subject.color);
         } else {
             taskCard.style.backgroundColor = "#F7F3E3";
+            taskCard.style.color = "#191923";
         }
 
         addStatusMenu(taskCard, task);
@@ -522,8 +529,10 @@ function renderTomorrowTasks() {
 
         if (subject) {
             taskCard.style.backgroundColor = subject.color;
+            taskCard.style.color = obtenerColorTexto(subject.color);
         } else {
             taskCard.style.backgroundColor = "#F7F3E3";
+            taskCard.style.color = "#191923";
         }
 
         taskCard.addEventListener("click", () => {
@@ -595,8 +604,10 @@ function renderPendingTasks() {
 
         if (subject) {
             taskCard.style.backgroundColor = subject.color;
+            taskCard.style.color = obtenerColorTexto(subject.color);
         } else {
             taskCard.style.backgroundColor = "#F7F3E3";
+            taskCard.style.color = "#191923";
         }
 
 

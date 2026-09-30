@@ -175,6 +175,7 @@ function renderUpcomingEvents() {
         item.className = "dashboard-item";
 
         item.style.backgroundColor = subjectColor;
+        item.style.color = obtenerColorTexto(subjectColor);
 
         item.innerHTML = `
         
@@ -258,6 +259,7 @@ function renderDashboardTasks() {
         item.className = "dashboard-item";
 
         item.style.backgroundColor = subjectColor;
+        item.style.color = obtenerColorTexto(subjectColor);
 
         item.innerHTML = `
 
@@ -337,6 +339,7 @@ function renderDashboardSubjects() {
         item.className = "dashboard-subject";
 
         item.style.backgroundColor = subject.color;
+        item.style.color = obtenerColorTexto(subjectColor);
 
         item.innerHTML = `
             <h4>${subject.name}</h4>
@@ -1712,28 +1715,16 @@ function renderHabitStats() {
 
 function renderHabitChart() {
 
-    const habitosActivosIds = new Set(
-        habits.map(habit => habit.id)
-    );
-
-    const completionsActivos =
-        allHabitCompletions.filter(completion =>
-            habitosActivosIds.has(completion.habit_id)
-        );
-
-    const canvas =
-        document.getElementById("habitsChart");
+    const canvas = document.getElementById("habitsChart");
 
     if (!canvas) {
         return;
     }
 
-    // Si ya existe una gráfica, destruirla
     if (habitsChart) {
         habitsChart.destroy();
     }
 
-    // Si no hay hábitos, no mostrar gráfica
     if (habits.length === 0) {
         return;
     }
@@ -1742,7 +1733,7 @@ function renderHabitChart() {
     hoy.setHours(0, 0, 0, 0);
 
     const labels = [];
-    const porcentajes = [];
+    const fechas = [];
 
     // ÚLTIMOS 30 DÍAS
     for (let i = 29; i >= 0; i--) {
@@ -1753,17 +1744,6 @@ function renderHabitChart() {
             hoy.getDate() - i
         );
 
-        // Día de la semana
-        let diaSemana = fecha.getDay();
-
-        // JS: domingo = 0
-        // AgendaHub: lunes = 0
-        diaSemana =
-            diaSemana === 0
-                ? 6
-                : diaSemana - 1;
-
-        // Fecha YYYY-MM-DD
         const año = fecha.getFullYear();
 
         const mes = String(
@@ -1777,78 +1757,83 @@ function renderHabitChart() {
         const fechaFormateada =
             `${año}-${mes}-${dia}`;
 
-        // Hábitos que estaban programados ese día
-        const habitsDelDia = habits.filter(habit =>
-            habit.days.includes(diaSemana)
-        );
+        fechas.push(fechaFormateada);
 
-        // Contar completados
-        const completados = habitsDelDia.filter(habit =>
-            completionsActivos.some(completion =>
-                completion.habit_id === habit.id &&
-                completion.date === fechaFormateada
-            )
-        ).length;
-
-        // Calcular porcentaje
-        const porcentaje =
-            habitsDelDia.length === 0
-                ? null
-                : Math.round(
-                    (completados / habitsDelDia.length) * 100
-                );
-
-        // Nombre del día para la gráfica
         labels.push(
             fecha.toLocaleDateString("es-ES", {
                 day: "2-digit",
                 month: "2-digit"
             })
         );
-
-        porcentajes.push(porcentaje);
     }
+    const datasets = habits.map(habit => {
 
-    // CREAR GRÁFICA
+        const datos = fechas.map(fechaFormateada => {
+
+            const fecha = new Date(
+                fechaFormateada + "T00:00:00"
+            );
+
+            let diaSemana = fecha.getDay();
+
+            diaSemana =
+                diaSemana === 0
+                    ? 6
+                    : diaSemana - 1;
+
+            if (!habit.days.includes(diaSemana)) {
+                return null;
+            }
+
+            const completado =
+                allHabitCompletions.some(completion =>
+                    completion.habit_id === habit.id &&
+                    completion.date === fechaFormateada
+                );
+
+            return completado ? 100 : 0;
+        });
+
+        return {
+            label: habit.name,
+
+            data: datos,
+
+            borderColor:
+                habit.color || "#60A561",
+
+            backgroundColor:
+                habit.color || "#60A561",
+
+            borderWidth: 3,
+
+            pointBackgroundColor:
+                habit.color || "#60A561",
+
+            pointBorderColor:
+                "#191923",
+
+            pointBorderWidth: 2,
+
+            pointRadius: 4,
+
+            pointHoverRadius: 6,
+
+            tension: 0.35,
+
+            fill: false,
+
+            spanGaps: false
+        };
+    });
+
     habitsChart = new Chart(canvas, {
 
         type: "line",
 
         data: {
             labels: labels,
-
-            datasets: [
-                {
-                    label: "Cumplimiento",
-
-                    data: porcentajes,
-
-                    borderColor: "#60A561",
-
-                    backgroundColor:
-                        "rgba(96, 165, 97, 0.15)",
-
-                    borderWidth: 3,
-
-                    pointBackgroundColor:
-                        "#60A561",
-
-                    pointBorderColor:
-                        "#191923",
-
-                    pointBorderWidth: 2,
-
-                    pointRadius: 4,
-
-                    pointHoverRadius: 6,
-
-                    tension: 0.35,
-
-                    fill: true,
-
-                    spanGaps: false
-                }
-            ]
+            datasets: datasets
         },
 
         options: {
@@ -1857,59 +1842,56 @@ function renderHabitChart() {
 
             maintainAspectRatio: false,
 
+            interaction: {
+                mode: "index",
+                intersect: false
+            },
+
             scales: {
 
                 y: {
-                    min: 0,
-                    max: 100,
+                        min: 0,
+                        max: 110,
 
-                    ticks: {
-                        stepSize: 20,
+                        ticks: {
+                            stepSize: 20,
 
-                        callback: function(value) {
-                            return value + "%";
+                            callback: function(value) {
+
+                                if (value > 100) {
+                                    return "";
+                                }
+
+                                return value + "%";
+                            }
                         }
                     }
-                },
-
-                x: {
-
-                    ticks: {
-                        maxTicksLimit: 10
-                    }
-
-                }
 
             },
 
             plugins: {
 
                 legend: {
-                    display: false
+                    display: true
                 },
 
                 tooltip: {
-
                     callbacks: {
-
                         label: function(context) {
 
                             if (context.raw === null) {
-                                return "Sin hábitos";
+                                return context.dataset.label;
                             }
 
-                            return context.raw + "%";
+                            return `${context.dataset.label}: ${context.raw}%`;
                         }
-
                     }
-
                 }
 
             }
         }
 
     });
-
 }
 
 
