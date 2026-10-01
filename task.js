@@ -99,7 +99,7 @@ async function createTask(title, subject, date, time, description) {
             user_id: user.id,
             subject_id: subject || null,
             title: title,
-            date: date,
+            date: date || null,
             time: time || null,
             description: description || null,
             status: "pending"
@@ -163,6 +163,15 @@ saveTaskButton.addEventListener("click", async () => {
     const description = document.getElementById("taskDescription").value.trim();
 
 
+    if (title === "") {
+
+        formError.textContent = "Introduce un título";
+        formError.classList.add("show");
+
+        return;
+    }
+
+
     if (editingTask) {
 
         const { data, error } = await supabaseClient
@@ -170,7 +179,7 @@ saveTaskButton.addEventListener("click", async () => {
             .update({
                 title: title,
                 subject_id: subject || null,
-                date: date,
+                date: date || null,
                 time: time || null,
                 description: description || null
             })
@@ -290,7 +299,6 @@ function addStatusMenu(taskCard, task) {
         }
 
         const statusMenu = document.createElement("div");
-
         statusMenu.classList.add("task-status-menu");
 
         statusMenu.innerHTML = `
@@ -369,13 +377,11 @@ function renderTasks() {
         return b.statusChangedAt - a.statusChangedAt;
     });
 
-    const tareasHechas = tareasOrdenadas.filter(task => task.status === "done");
-    const tareasVisibles = tareasOrdenadas.filter(task => task.status !== "done");
+    let tareasHechas = [];
 
-    tareasVisibles.forEach(task => {
+    tareasOrdenadas.forEach(task => {
 
         const taskCard = document.createElement("div");
-
         taskCard.classList.add("task-card");
 
         taskCard.addEventListener("click", () => {
@@ -383,53 +389,69 @@ function renderTasks() {
         });
 
         taskCard.innerHTML = `
-
             <div class="task-main">
+
                 <h3>${task.title}</h3>
+
             </div>
 
             <div class="task-actions">
-                <span class="task-date">${task.date.split("-").reverse().slice(0, 2).join("/")}</span>
+
+                <span class="task-date">
+                    ${task.date
+                        ? task.date.split("-").reverse().slice(0, 2).join("/")
+                        : "Sin fecha"}
+                </span>
+
                 <button class="task-status-button">
+
                     <span class="icon icon-down" aria-hidden="true">
-                                <svg viewBox="0 0 24 24">
-                                    <path d="M6 9L12 15L18 9"></path>
-                                </svg>
-                            </span>
+                        <svg viewBox="0 0 24 24">
+                            <path d="M6 9L12 15L18 9"></path>
+                        </svg>
+                    </span>
+
                 </button>
+
             </div>
         `;
-        
 
         const subject = getSubjectById(task.subject);
 
         if (subject) {
+
             taskCard.style.backgroundColor = subject.color;
             taskCard.style.color = obtenerColorTexto(subject.color);
+
         } else {
+
             taskCard.style.backgroundColor = "#F7F3E3";
             taskCard.style.color = "#191923";
+
         }
 
         addStatusMenu(taskCard, task);
 
+
         if (task.status === "pending") {
+
             pendingList.appendChild(taskCard);
-        }
 
-        if (task.status === "progress") {
+        } else if (task.status === "progress") {
+
             progressList.appendChild(taskCard);
+
+        } else if (task.status === "done") {
+
+            tareasHechas.push(task);
+
         }
 
-        if (task.status === "done") {
-            doneList.appendChild(taskCard);
-        }
     });
 
 
-    const tareasHechasVisibles = tareasHechas.slice(-5);
 
-    tareasHechasVisibles.forEach(task => {
+    tareasHechas.slice(0, 5).forEach(task => {
 
         const taskCard = document.createElement("div");
 
@@ -441,35 +463,53 @@ function renderTasks() {
 
         taskCard.innerHTML = `
             <div class="task-main">
+
                 <h3>${task.title}</h3>
+
             </div>
 
             <div class="task-actions">
-                <span class="task-date">${task.date.split("-").reverse().slice(0, 2).join("/")}</span>
+
+                <span class="task-date">
+                    ${task.date
+                        ? task.date.split("-").reverse().slice(0, 2).join("/")
+                        : "Sin fecha"}
+                </span>
+
                 <button class="task-status-button">
+
                     <span class="icon icon-down" aria-hidden="true">
-                                <svg viewBox="0 0 24 24">
-                                    <path d="M6 9L12 15L18 9"></path>
-                                </svg>
-                            </span>
+                        <svg viewBox="0 0 24 24">
+                            <path d="M6 9L12 15L18 9"></path>
+                        </svg>
+                    </span>
+
                 </button>
+
             </div>
         `;
 
         const subject = getSubjectById(task.subject);
 
         if (subject) {
+
             taskCard.style.backgroundColor = subject.color;
             taskCard.style.color = obtenerColorTexto(subject.color);
+
         } else {
+
             taskCard.style.backgroundColor = "#F7F3E3";
             taskCard.style.color = "#191923";
+
         }
 
         addStatusMenu(taskCard, task);
 
         doneList.appendChild(taskCard);
+
     });
+
+
 
     if (tareasHechas.length > 5) {
 
@@ -480,7 +520,9 @@ function renderTasks() {
         more.textContent = "...";
 
         doneList.appendChild(more);
+
     }
+
 }
 
 
@@ -593,8 +635,13 @@ function renderPendingTasks() {
 
 
     pendingTasks
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .forEach(task => {
+        .sort((a, b) => {
+            if (!a.date && !b.date) return 0;
+            if (!a.date) return 1;
+            if (!b.date) return -1;
+            return a.date.localeCompare(b.date);
+        })
+        .forEach(task => {
 
         const taskCard = document.createElement("div");
 
@@ -622,7 +669,11 @@ function renderPendingTasks() {
             </div>
 
             <div class="task-actions">
-                <span class="task-date">${task.date.split("-").reverse().slice(0, 2).join("/")}</span>
+                <span class="task-date">
+                    ${task.date
+                        ? task.date.split("-").reverse().slice(0, 2).join("/")
+                        : "Sin fecha"}
+                </span>
                 <button class="task-status-button">
                     <span class="icon icon-down" aria-hidden="true">
                                 <svg viewBox="0 0 24 24">
@@ -662,7 +713,9 @@ function openTaskInfo(task) {
     taskInfoSubject.textContent = subject ? subject.name : "Sin asignatura";
 
     taskInfoDate.textContent =
-        task.date.split("-").reverse().slice(0, 2).join("/");
+        task.date
+            ? task.date.split("-").reverse().slice(0, 2).join("/")
+            : "Sin fecha";
 
     taskInfoTime.textContent =
         task.time || "Sin hora";
@@ -718,7 +771,7 @@ editTask.addEventListener("click", () => {
 
     document.getElementById("taskSubject").value = taskSelected.subject;
 
-    document.getElementById("taskDate").value = taskSelected.date;
+    document.getElementById("taskDate").value = taskSelected.date || "";
 
     document.getElementById("taskTime").value = taskSelected.time;
 
@@ -767,4 +820,9 @@ deleteTask.addEventListener("click", async () => {
 
 
 
-loadTasks();
+async function iniciarTareas() {
+    await loadSubjects();
+    await loadTasks();
+}
+
+iniciarTareas();
