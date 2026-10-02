@@ -115,7 +115,7 @@ header .main h1{
     
     z-index: 999;
 
-    top: 60%;
+    top: 65%;
     left: 1rem;
 
     padding: 4rem 1rem 1rem 1rem;
@@ -130,7 +130,7 @@ header .main h1{
     
 
 
-    transform: translate(0, -60%);
+    transform: translate(0, -65%);
     transition: transform .3s ease;
 }
 
