@@ -93,6 +93,7 @@ async function loadDashboardData() {
     renderDashboardAverage();
     renderDashboardSubjects();
     renderCourseCountdown();
+    renderWelcome();
 }
 
 
@@ -339,7 +340,7 @@ function renderDashboardSubjects() {
         item.className = "dashboard-subject";
 
         item.style.backgroundColor = subject.color;
-        item.style.color = obtenerColorTexto(subjectColor);
+        item.style.color = obtenerColorTexto(subject.color);
 
         item.innerHTML = `
             <h4>${subject.name}</h4>
@@ -362,38 +363,88 @@ function renderDashboardSubjects() {
 async function renderCourseCountdown() {
 
     const countdown = document.getElementById("courseCountdown");
-    if(!countdown) return;
+
+    if (!countdown) return;
 
     const { data: { user }, error } =
         await supabaseClient.auth.getUser();
 
-    if (error || !user) return;
+    if (error || !user) {
+        console.error("No se ha podido obtener el usuario:", error);
+        return;
+    }
 
     const inicio = user.user_metadata?.course_start;
     const final = user.user_metadata?.course_end;
 
+    console.log("Fecha inicio:", inicio);
+    console.log("Fecha final:", final);
 
-    if(!inicio || !final) {
-        countdown.textContent = "--";
+    if (!inicio || !final) {
+
+        countdown.innerHTML = `
+            <strong>--</strong>
+            <span>días</span>
+        `;
+
         return;
     }
 
     const hoy = new Date();
-    const fechaFinal = new Date(final);
+    hoy.setHours(0, 0, 0, 0);
+
+    const fechaFinal = new Date(final + "T00:00:00");
 
     const diferencia = fechaFinal - hoy;
-    const dias = Math.ceil(diferencia / (1000* 60 * 60 * 24));
+
+    const dias = Math.ceil(
+        diferencia / (1000 * 60 * 60 * 24)
+    );
 
     if (dias > 0) {
+
         countdown.innerHTML = `
-        
             <strong>${dias}</strong>
             <span>días</span>
         `;
-    } else {
-        countdown.textContent = "FIN :)"
+
     }
+
 }
+
+
+async function renderWelcome() {
+
+    const welcomeTitle = document.getElementById("welcomeTitle");
+    const welcomeDate = document.getElementById("welcomeDate");
+
+    if (!welcomeTitle || !welcomeDate) return;
+
+    const { data: { user }, error } =
+        await supabaseClient.auth.getUser();
+
+    if (error || !user) {
+        console.error("No se ha podido obtener el usuario:", error);
+        return;
+    }
+
+    const nombre = user.user_metadata?.name || "usuario";
+
+    welcomeTitle.textContent = `¡Hola, ${nombre}!`;
+
+    const hoy = new Date();
+
+    const fecha = hoy.toLocaleDateString("es-ES", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+    });
+
+    welcomeDate.textContent =
+        fecha.charAt(0).toUpperCase() + fecha.slice(1);
+}
+
 
 loadDashboardData();
 

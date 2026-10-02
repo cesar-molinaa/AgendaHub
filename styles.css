@@ -3027,7 +3027,7 @@ cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: .5rem;
+    gap: 3rem;
     margin-bottom: 2rem;
 }
 
@@ -3041,6 +3041,8 @@ cursor: pointer;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+
+    width: 100%;
 
 }
 
@@ -3056,15 +3058,17 @@ cursor: pointer;
 
 
 .cuenta-atras{
+
+    min-width: 12rem;
     background-color: #FCB55F;
     border: 2px solid #191923;
     box-shadow: 5px 5px 0 #191923;
 
-    padding: 2rem 1.5rem;
+    padding: 1.5rem 1.5rem;
 
     display: flex;
-    flex-direction: column;
     align-items: center;
+    justify-content: space-around;
 
     transition: .2s ease;
 }
@@ -4805,7 +4809,13 @@ body:has(#sidebar.hide) .seccion-vistas-agenda {
 
 
 
+.aaa{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
+    width: 100%;
+}
 
 /*MÓVIL*/
 
