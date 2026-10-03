@@ -282,6 +282,26 @@ function eventoApareceEnFecha(evento, fechaFormateada) {
     return true;
 }
 
+function calendarioEventoVisible(evento) {
+
+
+    if (!evento.calendario) {
+        return true;
+    }
+
+    const calendario = calendarios.find(
+        calendario =>
+            String(calendario.id) === String(evento.calendario)
+    );
+
+
+    if (calendario) {
+        return calendario.visible !== false;
+    }
+
+
+    return true;
+}
 
 
 function obtenerTextoDiasRepeticion(evento) {
@@ -1690,8 +1710,7 @@ function mostrarSemana() {
 
     const fecha = new Date(fechaCalendario);
 
-    // LUNES DE LA SEMANA ACTUAL
-
+    // CALCULAR EL LUNES DE LA SEMANA
     let diaSemana = fecha.getDay();
 
     diaSemana = diaSemana === 0 ? 6 : diaSemana - 1;
@@ -1700,18 +1719,16 @@ function mostrarSemana() {
 
 
     // CREAR LOS 7 DÍAS
-
     for (let i = 0; i < 7; i++) {
 
         const dia = new Date(fecha);
-
         dia.setDate(fecha.getDate() + i);
 
-
         const day = document.createElement("div");
-
         day.classList.add("calendar-day");
 
+
+        // COMPROBAR SI ES HOY
         const hoy = new Date();
 
         if (
@@ -1719,169 +1736,200 @@ function mostrarSemana() {
             dia.getMonth() === hoy.getMonth() &&
             dia.getFullYear() === hoy.getFullYear()
         ) {
+
             day.classList.add("today");
+
         }
 
 
-        // CREAR LA FECHA EN FORMATO YYYY-MM-DD
-
+        // FECHA YYYY-MM-DD
         const añoEvento = dia.getFullYear();
 
-        const mesEvento = String(dia.getMonth() + 1).padStart(2, "0");
+        const mesEvento = String(
+            dia.getMonth() + 1
+        ).padStart(2, "0");
 
-        const diaEvento = String(dia.getDate()).padStart(2, "0");
+        const diaEvento = String(
+            dia.getDate()
+        ).padStart(2, "0");
 
-        const fechaFormateada = `${añoEvento}-${mesEvento}-${diaEvento}`;
+        const fechaFormateada =
+            `${añoEvento}-${mesEvento}-${diaEvento}`;
 
 
-        // MOSTRAR EL NOMBRE DEL DÍA Y EL NÚMERO
-
-        const nombreDia = dia.toLocaleDateString("es-ES", {
-            weekday: "short"
-        });
+        // CABECERA DEL DÍA
+        const nombreDia = dia.toLocaleDateString(
+            "es-ES",
+            {
+                weekday: "short"
+            }
+        );
 
         day.innerHTML = `
             <div class="week-day-header">
                 <strong>${nombreDia}</strong>
                 <span>${dia.getDate()}</span>
             </div>
+
+            <div class="week-day-events"></div>
         `;
 
 
-        // CLICK EN EL DÍA → CREAR EVENTO
-
+        // CLICK EN EL DÍA
         day.addEventListener("click", () => {
 
-    
             prepararNuevoEvento();
 
             fechaSeleccionada = fechaFormateada;
+
             eventDate.value = fechaSeleccionada;
             eventEndDate.value = fechaSeleccionada;
 
-
         });
 
 
-        // BUSCAR EVENTOS DE ESTE DÍA
+        // CONTENEDOR DE EVENTOS
+        const eventsContainer =
+            day.querySelector(".week-day-events");
 
+
+        // BUSCAR EVENTOS DEL DÍA
         const eventosDelDia = eventos
-        .filter(evento => eventoApareceEnFecha(evento, fechaFormateada))
-        .filter(evento => {
+            .filter(evento =>
+                eventoApareceEnFecha(
+                    evento,
+                    fechaFormateada
+                )
+            )
+            .filter(evento =>
+                calendarioEventoVisible(evento)
+            )
+            .sort((a, b) => {
 
-            const calendario = calendarios.find(
-                calendario => calendario.id === evento.calendario
-            );
+                const horaA = a.hora || "23:59";
+                const horaB = b.hora || "23:59";
 
-            return calendario && calendario.visible;
-
-        })
-        .sort((a, b) => {
-
-            return (a.hora || "23:59")
-                .localeCompare(b.hora || "23:59");
-
-        });
-
-
-
-        // MOSTRAR LOS EVENTOS
-
-        eventosDelDia.forEach(evento => {
-
-            const eventElement = document.createElement("div");
-
-            eventElement.classList.add("calendar-event");
-
-            eventElement.textContent = evento.titulo;
-
-            
-            if (evento.color) {
-                eventElement.style.backgroundColor = evento.color;
-
-                const colorFondo =
-                evento.color || "#60A561";
-
-            eventElement.style.backgroundColor = colorFondo;
-            eventElement.style.color = obtenerColorTexto(colorFondo);
-            } else {
-
-                const subject = getSubjectById(evento.asignatura);
-
-                if (subject) {
-                    eventElement.style.backgroundColor = subject.color;
-                } else {
-                    eventElement.style.backgroundColor = "#FCB55F";
-                }
-
-            }
-
-
-            // CLICK EN EL EVENTO
-
-            eventElement.addEventListener("click", (event) => {
-
-                event.stopPropagation();
-
-                eventoSeleccionado = evento;
-
-                infoTitle.textContent = evento.titulo;
-
-                const subject = getSubjectById(evento.asignatura);  
-                infoSubject.textContent = subject
-                ? subject.name
-                : "Sin asignatura";
-
-                if (evento.repetir) {
-
-                    infoDate.textContent =
-                        `Se repite: ${obtenerTextoDiasRepeticion(evento)}`;
-
-                    infoTime.textContent =
-                        `${evento.hora || "Sin hora"} - ${evento.horaFin || "Sin hora"}`;
-
-                } else {
-
-                    infoDate.textContent =
-                        evento.fecha;
-
-                    infoTime.textContent =
-                        `${evento.hora || "Sin hora"} - ${evento.horaFin || "Sin hora"}`;
-
-                }
-
-
-
-                infoDescription.textContent =
-                    evento.descripcion || "Sin descripción";
-
-                eventInfoModal.classList.add("show");
+                return horaA.localeCompare(horaB);
 
             });
 
 
-            day.appendChild(eventElement);
+        // MOSTRAR EVENTOS
+        eventosDelDia.forEach(evento => {
+
+            const eventElement =
+                document.createElement("div");
+
+            eventElement.classList.add(
+                "calendar-event"
+            );
+
+            eventElement.textContent =
+                evento.titulo;
+
+
+            // COLOR
+            const colorFondo =
+                evento.color || "#60A561";
+
+            eventElement.style.backgroundColor =
+                colorFondo;
+
+            eventElement.style.color =
+                obtenerColorTexto(colorFondo);
+
+
+            // INFORMACIÓN DEL EVENTO
+            eventElement.addEventListener(
+                "click",
+                (event) => {
+
+                    event.stopPropagation();
+
+                    eventoSeleccionado = evento;
+
+                    infoTitle.textContent =
+                        evento.titulo;
+
+
+                    const subject =
+                        getSubjectById(
+                            evento.asignatura
+                        );
+
+                    infoSubject.textContent =
+                        subject
+                            ? subject.name
+                            : "Sin asignatura";
+
+
+                    if (evento.repetir) {
+
+                        infoDate.textContent =
+                            `Se repite: ${
+                                obtenerTextoDiasRepeticion(
+                                    evento
+                                )
+                            }`;
+
+                    } else {
+
+                        infoDate.textContent =
+                            evento.fecha;
+
+                    }
+
+
+                    infoTime.textContent =
+                        `${evento.hora || "Sin hora"} - ${
+                            evento.horaFin || "Sin hora"
+                        }`;
+
+
+                    infoDescription.textContent =
+                        evento.descripcion ||
+                        "Sin descripción";
+
+
+                    eventInfoModal.classList.add(
+                        "show"
+                    );
+
+                }
+            );
+
+
+            eventsContainer.appendChild(
+                eventElement
+            );
 
         });
 
 
+        // AÑADIR DÍA AL CALENDARIO
         calendarDays.appendChild(day);
 
     }
 
 
-    // CAMBIAR EL TÍTULO DEL CALENDARIO
-
+    // TÍTULO
     const opciones = {
         month: "long",
         year: "numeric"
     };
 
-    let nombreMes = fecha.toLocaleDateString("es-ES", opciones);
+    let nombreMes =
+        fecha.toLocaleDateString(
+            "es-ES",
+            opciones
+        );
 
-    nombreMes = nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1);
+    nombreMes =
+        nombreMes.charAt(0).toUpperCase() +
+        nombreMes.slice(1);
 
-    currentMonth.textContent = nombreMes;
+    currentMonth.textContent =
+        nombreMes;
 
 }
 
@@ -1958,16 +2006,12 @@ function mostrarDia() {
     // BUSCAR LOS EVENTOS DE ESTE DÍA
 
     const eventosDelDia = eventos
-    .filter(evento => eventoApareceEnFecha(evento, fechaFormateada))
-    .filter(evento => {
-
-        const calendario = calendarios.find(
-            calendario => calendario.id === evento.calendario
-        );
-
-        return calendario && calendario.visible;
-
-    })
+    .filter(evento =>
+        eventoApareceEnFecha(evento, fechaFormateada)
+    )
+    .filter(evento =>
+        calendarioEventoVisible(evento)
+    )
     .sort((a, b) => {
 
         return (a.hora || "23:59")
