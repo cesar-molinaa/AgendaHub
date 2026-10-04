@@ -1301,54 +1301,6 @@ header .main h1{
 
 
 
-.calendar.week-view .calendar-day{
-    min-height: 30rem;
-    gap: .8rem;
-}
-
-.calendar.week-view .calendar-event{
-    width: 90%;
-
-    padding: .5rem .6rem;
-
-    border: 2px solid #191923;
-    box-shadow: 2px 2px 0 #191923;
-
-    font-size: .7rem;
-    font-weight: 700;
-
-    white-space: normal;
-    overflow: hidden;
-    text-overflow: ellipsis;
-
-}
-
-
-.calendar.week-view .calendar-event:hover{
-    transform: translateY(-5px);
-        box-shadow: 4px 4px 0 #191923;
-}
-
-
-
-
-
-.calendar.week-view .calendar-day.today > span {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 2rem;
-    height: 2rem;
-
-    background-color: #FCB55F;
-
-    border: 2px solid #191923;
-    box-shadow: 2px 2px 0 #191923;
-
-    font-weight: 700;
-}
-
 
 
 
@@ -4826,109 +4778,171 @@ body:has(#sidebar.hide) .seccion-vistas-agenda {
 
 
 
+/* =========================================================
+   VISTA SEMANAL
+========================================================= */
 
+#calendar.week-view {
+    width: 100%;
+    height: fit-content;
+    min-height: 0;
+    overflow: hidden;
+}
 
+/* CONTENEDOR DE LOS 7 DÍAS */
 
-.week-view #calendarDays {
+#calendar.week-view #calendarDays {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
+
     width: 100%;
-    height: 100%;
+    height: 30rem;
+
+    padding: 0;
+    margin: 0;
+
+    overflow: hidden;
 }
 
+/* CADA DÍA */
 
-.week-view .calendar-day {
-    min-width: 0;
-    min-height: 25rem;
+#calendar.week-view .calendar-day {
     position: relative;
+
+    width: 100%;
+    height: 30rem;
+    min-width: 0;
+    min-height: 30rem;
+
+    box-sizing: border-box;
+
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+
+    padding: 0;
+
+    background-color: #F7F3E3;
+
     border-right: 2px solid #191923;
     border-bottom: 2px solid #191923;
-    background-color: #F7F3E3;
+
+    overflow: hidden;
 }
 
-
-.week-view .calendar-day:last-child {
+#calendar.week-view .calendar-day:last-child {
     border-right: none;
 }
 
 
 /* CABECERA DEL DÍA */
 
-.week-day-header {
+#calendar.week-view .week-day-header {
     flex-shrink: 0;
-    min-height: 4rem;
-    padding: .8rem;
+
+    width: 100%;
+    height: 4.5rem;
+
+    box-sizing: border-box;
+
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+
     gap: .15rem;
+
+    padding: .5rem;
+
+    background-color: #FCB55F;
+
+    border-bottom: 2px solid #191923;
 }
 
-
-.week-day-header strong {
-    font-size: .8rem;
+#calendar.week-view .week-day-header strong {
+    font-size: .75rem;
+    font-weight: 800;
     text-transform: capitalize;
 }
 
-
-.week-day-header span {
+#calendar.week-view .week-day-header span {
     font-size: 1.4rem;
     font-weight: 800;
 }
 
 
+/* DÍA ACTUAL */
+
+#calendar.week-view .calendar-day.today .week-day-header {
+    background-color: #60A561;
+}
 
 
 /* CONTENEDOR DE EVENTOS */
 
-.week-day-events {
+#calendar.week-view .week-day-events {
     flex: 1;
+
     min-height: 0;
-    padding: .6rem;
+
+    padding: .7rem;
+
     display: flex;
     flex-direction: column;
-    gap: .5rem;
+
+    gap: .6rem;
+
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 
 /* EVENTOS */
 
-.week-view .calendar-event {
+#calendar.week-view .calendar-event {
     width: 100%;
-    min-height: 2.8rem;
-    padding: .6rem .7rem;
+    min-height: 3rem;
+
     box-sizing: border-box;
+
+    padding: .55rem .6rem;
 
     display: flex;
     align-items: center;
 
     border: 2px solid #191923;
-    box-shadow: 3px 3px 0 #191923;
+    box-shadow: 4px 4px 0 #191923;
 
     border-radius: 0;
 
-    font-size: .75rem;
+    font-size: .7rem;
     font-weight: 700;
+    line-height: 1.2;
 
     cursor: pointer;
 
     overflow: hidden;
-    text-overflow: ellipsis;
     word-break: break-word;
 
     transition: .15s ease;
 }
 
-
-.week-view .calendar-event:hover {
-    transform: translate(-1px, -1px);
-    box-shadow: 5px 5px 0 #191923;
+#calendar.week-view .calendar-event:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 #191923;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

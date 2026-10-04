@@ -1722,9 +1722,13 @@ function mostrarSemana() {
     for (let i = 0; i < 7; i++) {
 
         const dia = new Date(fecha);
+
         dia.setDate(fecha.getDate() + i);
 
+
+        // CONTENEDOR DEL DÍA
         const day = document.createElement("div");
+
         day.classList.add("calendar-day");
 
 
@@ -1743,32 +1747,33 @@ function mostrarSemana() {
 
 
         // FECHA YYYY-MM-DD
-        const añoEvento = dia.getFullYear();
+        const añoEvento =
+            dia.getFullYear();
 
-        const mesEvento = String(
-            dia.getMonth() + 1
-        ).padStart(2, "0");
+        const mesEvento =
+            String(dia.getMonth() + 1).padStart(2, "0");
 
-        const diaEvento = String(
-            dia.getDate()
-        ).padStart(2, "0");
+        const diaEvento =
+            String(dia.getDate()).padStart(2, "0");
 
         const fechaFormateada =
             `${añoEvento}-${mesEvento}-${diaEvento}`;
 
 
-        // CABECERA DEL DÍA
-        const nombreDia = dia.toLocaleDateString(
-            "es-ES",
-            {
+        // CABECERA
+        const nombreDia =
+            dia.toLocaleDateString("es-ES", {
                 weekday: "short"
-            }
-        );
+            });
+
 
         day.innerHTML = `
             <div class="week-day-header">
+
                 <strong>${nombreDia}</strong>
+
                 <span>${dia.getDate()}</span>
+
             </div>
 
             <div class="week-day-events"></div>
@@ -1780,10 +1785,14 @@ function mostrarSemana() {
 
             prepararNuevoEvento();
 
-            fechaSeleccionada = fechaFormateada;
+            fechaSeleccionada =
+                fechaFormateada;
 
-            eventDate.value = fechaSeleccionada;
-            eventEndDate.value = fechaSeleccionada;
+            eventDate.value =
+                fechaSeleccionada;
+
+            eventEndDate.value =
+                fechaSeleccionada;
 
         });
 
@@ -1793,7 +1802,9 @@ function mostrarSemana() {
             day.querySelector(".week-day-events");
 
 
-        // BUSCAR EVENTOS DEL DÍA
+        /*
+         * BUSCAR LOS EVENTOS DEL DÍA
+         */
         const eventosDelDia = eventos
             .filter(evento =>
                 eventoApareceEnFecha(
@@ -1806,23 +1817,30 @@ function mostrarSemana() {
             )
             .sort((a, b) => {
 
-                const horaA = a.hora || "23:59";
-                const horaB = b.hora || "23:59";
+                const horaA =
+                    a.hora || "23:59";
+
+                const horaB =
+                    b.hora || "23:59";
 
                 return horaA.localeCompare(horaB);
 
             });
 
 
-        // MOSTRAR EVENTOS
+        /*
+         * CREAR CADA EVENTO
+         */
         eventosDelDia.forEach(evento => {
 
             const eventElement =
                 document.createElement("div");
 
+
             eventElement.classList.add(
                 "calendar-event"
             );
+
 
             eventElement.textContent =
                 evento.titulo;
@@ -1839,14 +1857,18 @@ function mostrarSemana() {
                 obtenerColorTexto(colorFondo);
 
 
-            // INFORMACIÓN DEL EVENTO
+            /*
+             * ABRIR INFORMACIÓN DEL EVENTO
+             */
             eventElement.addEventListener(
                 "click",
                 (event) => {
 
                     event.stopPropagation();
 
-                    eventoSeleccionado = evento;
+                    eventoSeleccionado =
+                        evento;
+
 
                     infoTitle.textContent =
                         evento.titulo;
@@ -1856,6 +1878,7 @@ function mostrarSemana() {
                         getSubjectById(
                             evento.asignatura
                         );
+
 
                     infoSubject.textContent =
                         subject
@@ -1906,17 +1929,18 @@ function mostrarSemana() {
         });
 
 
-        // AÑADIR DÍA AL CALENDARIO
+        // AÑADIR EL DÍA AL CALENDARIO
         calendarDays.appendChild(day);
 
     }
 
 
-    // TÍTULO
+    // TÍTULO SUPERIOR
     const opciones = {
         month: "long",
         year: "numeric"
     };
+
 
     let nombreMes =
         fecha.toLocaleDateString(
@@ -1924,9 +1948,11 @@ function mostrarSemana() {
             opciones
         );
 
+
     nombreMes =
         nombreMes.charAt(0).toUpperCase() +
         nombreMes.slice(1);
+
 
     currentMonth.textContent =
         nombreMes;
