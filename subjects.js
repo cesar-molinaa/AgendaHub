@@ -985,21 +985,30 @@ async function renderSubjectContent() {
     subjectMarks.innerHTML = "";
 
 
-    // EVENTOS
+
 
     const { data: events, error: eventsError } = await supabaseClient
         .from("events")
         .select("*")
         .eq("subject_id", currentSubject.id)
-        .order("date", { ascending: true });
+        .order("start_date", { ascending: true })
+        .order("start_time", { ascending: true });
+
 
     if (eventsError) {
-        console.error("Error cargando eventos de la asignatura:", eventsError);
-        return;
-    }
 
+        console.error(
+            "Error cargando eventos de la asignatura:",
+            eventsError
+        );
 
-    if (!events || events.length === 0) {
+        subjectEvents.innerHTML = `
+            <p class="empty-subject-content">
+                No se han podido cargar los eventos.
+            </p>
+        `;
+
+    } else if (!events || events.length === 0) {
 
         subjectEvents.innerHTML = `
             <p class="empty-subject-content">
@@ -1015,14 +1024,21 @@ async function renderSubjectContent() {
 
             eventCard.classList.add("subject-event-card");
 
+            const fecha = evento.start_date
+                ? evento.start_date.split("-").reverse().join("/")
+                : "Sin fecha";
+
+            const hora = evento.start_time
+                ? evento.start_time.slice(0, 5)
+                : "Sin hora";
+
             eventCard.innerHTML = `
                 <div>
                     <h3>${evento.title}</h3>
+                    <span>${fecha}</span>
                 </div>
 
-                <span>
-                    ${evento.date.split("-").reverse().join("/")}
-                </span>
+                <span>${hora}</span>
             `;
 
             subjectEvents.appendChild(eventCard);
@@ -1032,21 +1048,30 @@ async function renderSubjectContent() {
     }
 
 
-    // TAREAS
+
 
     const { data: tasks, error: tasksError } = await supabaseClient
         .from("tasks")
         .select("*")
         .eq("subject_id", currentSubject.id)
-        .order("date", { ascending: true });
+        .order("date", { ascending: true })
+        .order("time", { ascending: true });
+
 
     if (tasksError) {
-        console.error("Error cargando tareas de la asignatura:", tasksError);
-        return;
-    }
 
+        console.error(
+            "Error cargando tareas de la asignatura:",
+            tasksError
+        );
 
-    if (!tasks || tasks.length === 0) {
+        subjectTasks.innerHTML = `
+            <p class="empty-subject-content">
+                No se han podido cargar las tareas.
+            </p>
+        `;
+
+    } else if (!tasks || tasks.length === 0) {
 
         subjectTasks.innerHTML = `
             <p class="empty-subject-content">
@@ -1072,10 +1097,14 @@ async function renderSubjectContent() {
                 statusText = "Hecho";
             }
 
+            const fecha = task.date
+                ? task.date.split("-").reverse().join("/")
+                : "Sin fecha";
+
             taskCard.innerHTML = `
                 <div>
                     <h3>${task.title}</h3>
-                    <span>${task.date.split("-").reverse().join("/")}</span>
+                    <span>${fecha}</span>
                 </div>
 
                 <span>${statusText}</span>
@@ -1088,21 +1117,29 @@ async function renderSubjectContent() {
     }
 
 
-    // CALIFICACIONES
+
 
     const { data: marks, error: marksError } = await supabaseClient
         .from("marks")
         .select("*")
         .eq("subject_id", currentSubject.id)
-        .order("date", { ascending: true });
+        .order("date", { ascending: false });
+
 
     if (marksError) {
-        console.error("Error cargando calificaciones de la asignatura:", marksError);
-        return;
-    }
 
+        console.error(
+            "Error cargando calificaciones de la asignatura:",
+            marksError
+        );
 
-    if (!marks || marks.length === 0) {
+        subjectMarks.innerHTML = `
+            <p class="empty-subject-content">
+                No se han podido cargar las calificaciones.
+            </p>
+        `;
+
+    } else if (!marks || marks.length === 0) {
 
         subjectMarks.innerHTML = `
             <p class="empty-subject-content">
@@ -1118,10 +1155,14 @@ async function renderSubjectContent() {
 
             markCard.classList.add("subject-mark-card");
 
+            const fecha = mark.date
+                ? mark.date.split("-").reverse().join("/")
+                : "Sin fecha";
+
             markCard.innerHTML = `
                 <div>
                     <h3>${mark.title}</h3>
-                    <span>${mark.date.split("-").reverse().join("/")}</span>
+                    <span>${fecha}</span>
                 </div>
 
                 <strong>${mark.value}</strong>
@@ -1133,7 +1174,7 @@ async function renderSubjectContent() {
 
     }
 
-};
+}
 
 
 
