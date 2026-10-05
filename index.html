@@ -17,6 +17,12 @@
         </div>
 
         <div class="buttons">
+
+            <div class="timer-header" id="timerHeader">
+                <img src="imgs/cronometro.png" class="timer-icon">
+                <span id="timerHeaderTime"></span>
+            </div>
+
             <img src="imgs/user.png" alt="user" id="userIcon">
         </div>
 
@@ -24,6 +30,70 @@
         
 
     </header>
+
+
+
+    <div class="timer-window" id="timerWindow">
+
+        <div class="timer-window-header" id="timerWindowHeader">
+
+            <strong>Temporizador</strong>
+
+            <button id="closeTimer" type="button" aria-label="Cerrar">
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="timer-content">
+
+            <div class="timer-display">
+
+                <input
+                    type="text"
+                    id="timerInput"
+                    value="25:00"
+                    maxlength="5"
+                    aria-label="Duración del temporizador"
+                >
+
+            </div>
+
+
+            <div class="timer-buttons">
+
+                <button
+                    id="timerStart"
+                    type="button"
+                    aria-label="Empezar"
+                >
+                    ▶
+                </button>
+
+                <button
+                    id="timerPause"
+                    type="button"
+                    aria-label="Pausar"
+                >
+                    ⏸
+                </button>
+
+                <button
+                    id="timerReset"
+                    type="button"
+                    aria-label="Reiniciar"
+                >
+                    ↻
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
 
     <div class="sidebar" id="sidebar">
 
@@ -423,5 +493,6 @@
 
     <script src="script.js"></script>
     <script src="index.js"></script>
+    <script src="timer.js"></script>
 </body>
 </html>

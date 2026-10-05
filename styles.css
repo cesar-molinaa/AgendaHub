@@ -100,6 +100,18 @@ header .main h1{
     font-weight: 700;
 }
 
+header .timer-icon{
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+header .timer-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: .5rem;
+}
+
 
 
 .sidebar{
@@ -4933,6 +4945,191 @@ body:has(#sidebar.hide) .seccion-vistas-agenda {
 
 
 
+
+
+
+
+
+
+
+.timer-header {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+
+    padding: .35rem .6rem;
+
+
+    cursor: pointer;
+}
+
+
+
+/* =========================================
+   TEMPORIZADOR
+========================================= */
+
+.timer-window {
+    position: fixed;
+    top: 7rem;
+    right: 3rem;
+
+    width: 300px;
+
+    background-color: #F7F3E3;
+
+    border: 2px solid #191923;
+    box-shadow: 8px 8px 0 #191923;
+
+    z-index: 4000;
+
+    display: none;
+}
+
+.timer-window.show {
+    display: block;
+}
+
+
+/* CABECERA */
+
+.timer-window-header {
+    height: 3rem;
+    padding: 0 1rem;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background-color: #FCB55F;
+
+    border-bottom: 2px solid #191923;
+
+    cursor: grab;
+}
+
+.timer-window-header:active {
+    cursor: grabbing;
+}
+
+.timer-window-header strong {
+    font-size: .8rem;
+    font-weight: 800;
+}
+
+.timer-window-header button {
+    width: 2rem;
+    height: 2rem;
+
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: transparent;
+
+    border: none;
+    box-shadow: none;
+
+    font-family: inherit;
+    font-size: 1.4rem;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+
+/* CONTENIDO */
+
+.timer-content {
+    padding: 1.5rem;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 1.5rem;
+}
+
+
+/* TIEMPO */
+
+.timer-display {
+    width: 100%;
+}
+
+#timerInput {
+    width: 100%;
+
+    padding: 0;
+
+    box-sizing: border-box;
+
+    background: transparent;
+
+    border: none;
+    outline: none;
+    box-shadow: none;
+
+    color: #191923;
+
+    font-family: inherit;
+    font-size: 4rem;
+    font-weight: 800;
+
+    text-align: center;
+    letter-spacing: .05em;
+}
+
+
+/* BOTONES */
+
+.timer-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: .8rem;
+}
+
+.timer-buttons button {
+    width: 3.2rem;
+    height: 3.2rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    background-color: #FCB55F;
+
+    border: 2px solid #191923;
+    box-shadow: 4px 4px 0 #191923;
+
+    color: #191923;
+
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition: .15s ease;
+}
+
+.timer-buttons button:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 #191923;
+}
+
+.timer-buttons button:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 #191923;
+}
 
 
 
